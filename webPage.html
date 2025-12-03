@@ -1418,24 +1418,24 @@
             questionAnswered = false;
             usedQuizEmotions = [];
             
-            // Generate 10 unique quiz questions without repetition
+            // Generate 10 quiz questions with shuffled emotions
             quizQuestions = [];
             
-            // Create a pool by duplicating emotions to have enough for 10 questions
-            // Shuffle the emotions array and pick emotions ensuring each appears at most twice
+            // Create a pool of emotions for 10 questions by repeating and shuffling
             let emotionPool = [];
             
-            // First, shuffle and add all emotions
+            // First pass: add all emotions shuffled
             let shuffledEmotions = shuffleArray([...emotions]);
             emotionPool = emotionPool.concat(shuffledEmotions);
             
-            // Then shuffle again and add more to reach 10 total (works with any number of emotions)
-            shuffledEmotions = shuffleArray([...emotions]);
-            const additionalNeeded = 10 - emotionPool.length;
-            emotionPool = emotionPool.concat(shuffledEmotions.slice(0, additionalNeeded));
+            // Second pass: add remaining needed emotions shuffled
+            if (emotionPool.length < 10) {
+                shuffledEmotions = shuffleArray([...emotions]);
+                const additionalNeeded = 10 - emotionPool.length;
+                emotionPool = emotionPool.concat(shuffledEmotions.slice(0, additionalNeeded));
+            }
             
-            // Now we have 10 emotions with better distribution
-            // Build questions from this pool
+            // Build questions from the emotion pool
             for (let i = 0; i < 10; i++) {
                 const correctEmotion = emotionPool[i];
                 
