@@ -773,6 +773,7 @@
         let usedQuizEmotions = [];
         let completedFlashcards = new Set();
         let flashcardsCompleted = false;
+        let currentAudio = null;  // Track currently playing audio
 
         // Sound file mappings for each emotion
         const soundFiles = {
@@ -1417,20 +1418,25 @@
             questionAnswered = false;
             usedQuizEmotions = [];
             
-            // Generate 10 unique quiz questions
+            // Generate 10 unique quiz questions without repetition
             quizQuestions = [];
-            const emotionPool = [...emotions];
             
+            // Create a pool by duplicating emotions to have enough for 10 questions
+            // Shuffle the emotions array and pick emotions ensuring each appears at most twice
+            let emotionPool = [];
+            
+            // First, shuffle and add all 6 emotions
+            let shuffledEmotions = shuffleArray([...emotions]);
+            emotionPool = emotionPool.concat(shuffledEmotions);
+            
+            // Then shuffle again and add 4 more to reach 10 total
+            shuffledEmotions = shuffleArray([...emotions]);
+            emotionPool = emotionPool.concat(shuffledEmotions.slice(0, 4));
+            
+            // Now we have 10 emotions (6 + 4) with no single emotion appearing more than twice
+            // Build questions from this pool
             for (let i = 0; i < 10; i++) {
-                let correctEmotion;
-                
-                // Ensure we use each emotion at least once, then repeat if needed
-                if (i < emotions.length) {
-                    correctEmotion = emotionPool[i];
-                } else {
-                    // For questions 7-10, randomly select from all emotions
-                    correctEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-                }
+                const correctEmotion = emotionPool[i];
                 
                 const wrongOptions = emotions.filter(e => e.name !== correctEmotion.name);
                 const shuffledWrong = shuffleArray(wrongOptions).slice(0, 3);
@@ -1571,11 +1577,23 @@
             });
         }
 
+        let currentPlayingIndex = null;  // Track which card is currently playing
+
         function playEmotionSound(emotionIndex) {
             const emotion = emotions[emotionIndex];
             const card = document.querySelectorAll('.sound-card')[emotionIndex];
             const playButton = card.querySelector('.play-button');
             
+            // Reset the previously playing card's UI if there is one
+            if (currentPlayingIndex !== null && currentPlayingIndex !== emotionIndex) {
+                const prevCard = document.querySelectorAll('.sound-card')[currentPlayingIndex];
+                const prevButton = prevCard.querySelector('.play-button');
+                prevCard.classList.remove('playing');
+                prevButton.textContent = '🔊 Play Voice';
+                prevButton.classList.remove('playing');
+            }
+            
+            currentPlayingIndex = emotionIndex;
             card.classList.add('playing');
             playButton.textContent = '🎵 Playing...';
             playButton.classList.add('playing');
@@ -1585,6 +1603,9 @@
                 card.classList.remove('playing');
                 playButton.textContent = '🔊 Play Voice';
                 playButton.classList.remove('playing');
+                if (currentPlayingIndex === emotionIndex) {
+                    currentPlayingIndex = null;
+                }
             });
         }
 
@@ -1595,29 +1616,48 @@
                 return;
             }
             
+            // Stop any currently playing audio to prevent overlapping
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
             const audio = new Audio(soundFile);
+            currentAudio = audio;  // Track the current audio
+            
             audio.onended = () => {
+                if (currentAudio === audio) {
+                    currentAudio = null;
+                }
                 if (callback) callback();
             };
             audio.onerror = () => {
                 console.error('Error loading sound file:', soundFile);
+                if (currentAudio === audio) {
+                    currentAudio = null;
+                }
                 if (callback) callback();
             };
             audio.play().catch(err => {
                 console.error('Error playing sound:', err);
+                if (currentAudio === audio) {
+                    currentAudio = null;
+                }
                 if (callback) callback();
             });
         }
 
         function playSuccessSound() {
-            if (!audioContext) {
-                initAudioContext();
+            // Simple success sound - just silent for now to prevent errors
+            // Could implement Web Audio API tones here if needed
+            try {
+                if (!audioContext) {
+                    initAudioContext();
+                }
+                // Removed playVoicePattern call to prevent errors
+            } catch (err) {
+                console.log('Audio playback not available');
             }
-            playVoicePattern([
-                {freq: 523, duration: 0.1, volume: 0.2},
-                {freq: 659, duration: 0.1, volume: 0.2},
-                {freq: 784, duration: 0.15, volume: 0.25}
-            ]);
         }
 
         function showCompletionMessage(message) {
