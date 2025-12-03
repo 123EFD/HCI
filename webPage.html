@@ -1425,15 +1425,16 @@
             // Shuffle the emotions array and pick emotions ensuring each appears at most twice
             let emotionPool = [];
             
-            // First, shuffle and add all 6 emotions
+            // First, shuffle and add all emotions
             let shuffledEmotions = shuffleArray([...emotions]);
             emotionPool = emotionPool.concat(shuffledEmotions);
             
-            // Then shuffle again and add 4 more to reach 10 total
+            // Then shuffle again and add more to reach 10 total (works with any number of emotions)
             shuffledEmotions = shuffleArray([...emotions]);
-            emotionPool = emotionPool.concat(shuffledEmotions.slice(0, 4));
+            const additionalNeeded = 10 - emotionPool.length;
+            emotionPool = emotionPool.concat(shuffledEmotions.slice(0, additionalNeeded));
             
-            // Now we have 10 emotions (6 + 4) with no single emotion appearing more than twice
+            // Now we have 10 emotions with better distribution
             // Build questions from this pool
             for (let i = 0; i < 10; i++) {
                 const correctEmotion = emotionPool[i];
@@ -1648,13 +1649,12 @@
         }
 
         function playSuccessSound() {
-            // Simple success sound - just silent for now to prevent errors
-            // Could implement Web Audio API tones here if needed
+            // TODO: Implement Web Audio API tones for success sound feedback
+            // Currently silent to prevent errors - consider adding audio feedback in future
             try {
                 if (!audioContext) {
                     initAudioContext();
                 }
-                // Removed playVoicePattern call to prevent errors
             } catch (err) {
                 console.log('Audio playback not available');
             }
