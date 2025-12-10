@@ -1292,8 +1292,6 @@
         // Drag and Drop Matching Game functions
         let touchedElement = null;
         let touchClone = null;
-        let initialTouchX = 0;
-        let initialTouchY = 0;
         
         function initMatchingGame() {
             matchingScore = 0;
@@ -1396,8 +1394,6 @@
             if (!touchedElement) return;
             
             const touch = e.touches[0];
-            initialTouchX = touch.clientX;
-            initialTouchY = touch.clientY;
             
             touchedElement.classList.add('dragging');
             
