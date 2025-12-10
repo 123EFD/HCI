@@ -1290,9 +1290,19 @@
         }
 
         // Drag and Drop Matching Game functions
+        let touchedElement = null;
+        let touchClone = null;
+        
         function initMatchingGame() {
             matchingScore = 0;
             matchesFound = 0;
+            
+            // Reset touch state variables
+            touchedElement = null;
+            if (touchClone) {
+                touchClone.remove();
+                touchClone = null;
+            }
             
             const emojiGrid = document.getElementById('emoji-grid');
             emojiGrid.innerHTML = '';
@@ -1311,8 +1321,14 @@
                 
                 emojiElement.appendChild(faceSvg);
                 
+                // Desktop drag and drop
                 emojiElement.addEventListener('dragstart', handleDragStart);
                 emojiElement.addEventListener('dragend', handleDragEnd);
+                
+                // Mobile touch events
+                emojiElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+                emojiElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+                emojiElement.addEventListener('touchend', handleTouchEnd, { passive: false });
                 
                 emojiGrid.appendChild(emojiElement);
             });
@@ -1347,6 +1363,114 @@
             draggedElement = null;
         }
 
+        function handleSuccessfulMatch(dropZone, draggedElement, targetEmotion) {
+            dropZone.classList.add('matched');
+            const faceSvg = draggedElement.querySelector('svg').cloneNode(true);
+            faceSvg.style.width = '50px';
+            faceSvg.style.height = '50px';
+            faceSvg.style.display = 'inline-block';
+            faceSvg.style.marginRight = '10px';
+            dropZone.innerHTML = '';
+            dropZone.appendChild(faceSvg);
+            dropZone.appendChild(document.createTextNode(targetEmotion));
+            draggedElement.style.display = 'none';
+            
+            matchingScore += 10;
+            matchesFound++;
+            playSuccessSound();
+            
+            if (matchesFound === 6) {
+                setTimeout(() => {
+                    showCompletionMessage('Amazing! You matched all emotions! 🌟');
+                }, 500);
+            }
+            
+            updateMatchingScore();
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            touchedElement = e.target.closest('.draggable-emoji');
+            if (!touchedElement) return;
+            
+            const touch = e.touches[0];
+            
+            touchedElement.classList.add('dragging');
+            
+            // Create a clone for visual feedback
+            touchClone = touchedElement.cloneNode(true);
+            touchClone.style.position = 'fixed';
+            touchClone.style.pointerEvents = 'none';
+            touchClone.style.zIndex = '1000';
+            touchClone.style.opacity = '0.8';
+            touchClone.style.width = touchedElement.offsetWidth + 'px';
+            touchClone.style.height = touchedElement.offsetHeight + 'px';
+            touchClone.style.left = (touch.clientX - touchedElement.offsetWidth / 2) + 'px';
+            touchClone.style.top = (touch.clientY - touchedElement.offsetHeight / 2) + 'px';
+            document.body.appendChild(touchClone);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!touchedElement || !touchClone) return;
+            
+            const touch = e.touches[0];
+            touchClone.style.left = (touch.clientX - touchedElement.offsetWidth / 2) + 'px';
+            touchClone.style.top = (touch.clientY - touchedElement.offsetHeight / 2) + 'px';
+            
+            // Highlight drop zones when hovering over them
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+            
+            const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropZone = elemBelow?.closest('.drop-zone');
+            if (dropZone && !dropZone.classList.contains('matched')) {
+                dropZone.classList.add('drag-over');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!touchedElement) return;
+            
+            const touch = e.changedTouches[0];
+            const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropZone = elemBelow?.closest('.drop-zone');
+            
+            // Clean up visual feedback
+            if (touchClone) {
+                touchClone.remove();
+                touchClone = null;
+            }
+            
+            touchedElement.classList.remove('dragging');
+            
+            // Remove drag-over class from all drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+            
+            // Check if dropped on a valid drop zone
+            if (dropZone && !dropZone.classList.contains('matched')) {
+                const draggedEmotion = touchedElement.dataset.emotion;
+                const targetEmotion = dropZone.dataset.emotion;
+                
+                if (draggedEmotion === targetEmotion) {
+                    handleSuccessfulMatch(dropZone, touchedElement, targetEmotion);
+                } else {
+                    dropZone.classList.add('wrong');
+                    setTimeout(() => {
+                        dropZone.classList.remove('wrong');
+                    }, 500);
+                }
+            }
+            
+            touchedElement = null;
+        }
+
         function handleDragOver(e) {
             e.preventDefault();
             e.target.classList.add('drag-over');
@@ -1368,34 +1492,13 @@
             const targetEmotion = e.target.dataset.emotion;
             
             if (draggedEmotion === targetEmotion) {
-                e.target.classList.add('matched');
-                const faceSvg = draggedElement.querySelector('svg').cloneNode(true);
-                faceSvg.style.width = '50px';
-                faceSvg.style.height = '50px';
-                faceSvg.style.display = 'inline-block';
-                faceSvg.style.marginRight = '10px';
-                e.target.innerHTML = '';
-                e.target.appendChild(faceSvg);
-                e.target.appendChild(document.createTextNode(targetEmotion));
-                draggedElement.style.display = 'none';
-                
-                matchingScore += 10;
-                matchesFound++;
-                playSuccessSound();
-                
-                if (matchesFound === 6) {
-                    setTimeout(() => {
-                        showCompletionMessage('Amazing! You matched all emotions! 🌟');
-                    }, 500);
-                }
+                handleSuccessfulMatch(e.target, draggedElement, targetEmotion);
             } else {
                 e.target.classList.add('wrong');
                 setTimeout(() => {
                     e.target.classList.remove('wrong');
                 }, 500);
             }
-            
-            updateMatchingScore();
         }
 
         function updateMatchingScore() {
