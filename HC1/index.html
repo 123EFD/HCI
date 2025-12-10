@@ -1299,6 +1299,13 @@
             matchingScore = 0;
             matchesFound = 0;
             
+            // Reset touch state variables
+            touchedElement = null;
+            if (touchClone) {
+                touchClone.remove();
+                touchClone = null;
+            }
+            
             const emojiGrid = document.getElementById('emoji-grid');
             emojiGrid.innerHTML = '';
             
@@ -1356,6 +1363,31 @@
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
             draggedElement = null;
+        }
+
+        function handleSuccessfulMatch(dropZone, draggedElement, targetEmotion) {
+            dropZone.classList.add('matched');
+            const faceSvg = draggedElement.querySelector('svg').cloneNode(true);
+            faceSvg.style.width = '50px';
+            faceSvg.style.height = '50px';
+            faceSvg.style.display = 'inline-block';
+            faceSvg.style.marginRight = '10px';
+            dropZone.innerHTML = '';
+            dropZone.appendChild(faceSvg);
+            dropZone.appendChild(document.createTextNode(targetEmotion));
+            draggedElement.style.display = 'none';
+            
+            matchingScore += 10;
+            matchesFound++;
+            playSuccessSound();
+            
+            if (matchesFound === 6) {
+                setTimeout(() => {
+                    showCompletionMessage('Amazing! You matched all emotions! 🌟');
+                }, 500);
+            }
+            
+            updateMatchingScore();
         }
 
         function handleTouchStart(e) {
@@ -1431,34 +1463,13 @@
                 const targetEmotion = dropZone.dataset.emotion;
                 
                 if (draggedEmotion === targetEmotion) {
-                    dropZone.classList.add('matched');
-                    const faceSvg = touchedElement.querySelector('svg').cloneNode(true);
-                    faceSvg.style.width = '50px';
-                    faceSvg.style.height = '50px';
-                    faceSvg.style.display = 'inline-block';
-                    faceSvg.style.marginRight = '10px';
-                    dropZone.innerHTML = '';
-                    dropZone.appendChild(faceSvg);
-                    dropZone.appendChild(document.createTextNode(targetEmotion));
-                    touchedElement.style.display = 'none';
-                    
-                    matchingScore += 10;
-                    matchesFound++;
-                    playSuccessSound();
-                    
-                    if (matchesFound === 6) {
-                        setTimeout(() => {
-                            showCompletionMessage('Amazing! You matched all emotions! 🌟');
-                        }, 500);
-                    }
+                    handleSuccessfulMatch(dropZone, touchedElement, targetEmotion);
                 } else {
                     dropZone.classList.add('wrong');
                     setTimeout(() => {
                         dropZone.classList.remove('wrong');
                     }, 500);
                 }
-                
-                updateMatchingScore();
             }
             
             touchedElement = null;
@@ -1485,34 +1496,13 @@
             const targetEmotion = e.target.dataset.emotion;
             
             if (draggedEmotion === targetEmotion) {
-                e.target.classList.add('matched');
-                const faceSvg = draggedElement.querySelector('svg').cloneNode(true);
-                faceSvg.style.width = '50px';
-                faceSvg.style.height = '50px';
-                faceSvg.style.display = 'inline-block';
-                faceSvg.style.marginRight = '10px';
-                e.target.innerHTML = '';
-                e.target.appendChild(faceSvg);
-                e.target.appendChild(document.createTextNode(targetEmotion));
-                draggedElement.style.display = 'none';
-                
-                matchingScore += 10;
-                matchesFound++;
-                playSuccessSound();
-                
-                if (matchesFound === 6) {
-                    setTimeout(() => {
-                        showCompletionMessage('Amazing! You matched all emotions! 🌟');
-                    }, 500);
-                }
+                handleSuccessfulMatch(e.target, draggedElement, targetEmotion);
             } else {
                 e.target.classList.add('wrong');
                 setTimeout(() => {
                     e.target.classList.remove('wrong');
                 }, 500);
             }
-            
-            updateMatchingScore();
         }
 
         function updateMatchingScore() {
