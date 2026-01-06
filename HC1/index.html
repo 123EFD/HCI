@@ -1039,38 +1039,7 @@
                     break;
 
                 case "Scared":
-                    // Worried eyebrows
-                    const wBrow1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    wBrow1.setAttribute("d", "M 55 65 Q 70 60 85 65");
-                    wBrow1.setAttribute("stroke", "#2d3748");
-                    wBrow1.setAttribute("stroke-width", "4");
-                    wBrow1.setAttribute("fill", "none");
-                    wBrow1.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(wBrow1);
-                    
-                    const wBrow2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    wBrow2.setAttribute("d", "M 115 65 Q 130 60 145 65");
-                    wBrow2.setAttribute("stroke", "#2d3748");
-                    wBrow2.setAttribute("stroke-width", "4");
-                    wBrow2.setAttribute("fill", "none");
-                    wBrow2.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(wBrow2);
-                    
-                    // Wide eyes
-                    drawEye(svgElement, 70, 85, false, true);
-                    drawEye(svgElement, 130, 85, false, true);
-                    
-                    // Small worried mouth
-                    const wMouth = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-                    wMouth.setAttribute("cx", "100");
-                    wMouth.setAttribute("cy", "135");
-                    wMouth.setAttribute("rx", "10");
-                    wMouth.setAttribute("ry", "12");
-                    wMouth.setAttribute("fill", "none");
-                    wMouth.setAttribute("stroke", "#2d3748");
-                    wMouth.setAttribute("stroke-width", "3");
-                    svgElement.appendChild(wMouth);
-                    break;
+                    <img class="emoji emoji-surprised" src="assets/scared.png" alt="Surprised" width="64" height="64" loading="lazy" decoding="async" />
 
                 case "Excited":
                     // Raised eyebrows
