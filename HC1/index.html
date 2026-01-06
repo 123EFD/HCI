@@ -655,7 +655,6 @@
       </div>
       <div class="flashcard-back">
        <div class="emotion-name" id="card-emotion-name">
-        Happy
        </div>
        <div class="flashcard-buttons">
         <button class="answer-button yes" onclick="handleFlashcardAnswer(true, event)">YES</button>
@@ -1240,7 +1239,7 @@
             const feedback = document.getElementById('card-feedback');
             const buttons = document.querySelectorAll('.answer-button');
             
-            // Since the question always asks about the current emotion, YES is always correct
+            // Since the displayed emotion name matches the face shown, YES is always correct
             if (isYes) {
                 feedback.textContent = "Correct! 🌟";
                 feedback.className = 'flashcard-feedback correct';
