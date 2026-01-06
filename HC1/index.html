@@ -957,7 +957,7 @@
                     break;
 
                 case "Angry":
-                    // Angry eyebrows in "\ /" shape - left goes down-left, right goes down-right
+                    // Angry eyebrows
                     const brow1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
                     brow1.setAttribute("x1", "55");
                     brow1.setAttribute("y1", "65");
@@ -969,7 +969,7 @@
                     svgElement.appendChild(brow1);
                     
                     const brow2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    brow2.setAttribute("x1", "115");
+                   brow2.setAttribute("x1", "115");
                     brow2.setAttribute("y1", "75");
                     brow2.setAttribute("x2", "145");
                     brow2.setAttribute("y2", "65");
@@ -978,174 +978,67 @@
                     brow2.setAttribute("stroke-linecap", "round");
                     svgElement.appendChild(brow2);
                     
-                    // Narrowed eyes showing anger
-                    drawEye(svgElement, 70, 88, false);
-                    drawEye(svgElement, 130, 88, false);
-                    
-                    // Gritted teeth / grimacing mouth
-                    const angryMouthTop = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    angryMouthTop.setAttribute("d", "M 65 130 L 135 130");
-                    angryMouthTop.setAttribute("stroke", "#2d3748");
-                    angryMouthTop.setAttribute("stroke-width", "4");
-                    angryMouthTop.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(angryMouthTop);
-                    
-                    const angryMouthBottom = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    angryMouthBottom.setAttribute("d", "M 65 138 L 135 138");
-                    angryMouthBottom.setAttribute("stroke", "#2d3748");
-                    angryMouthBottom.setAttribute("stroke-width", "4");
-                    angryMouthBottom.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(angryMouthBottom);
-                    
-                    // Teeth lines to show gritting
-                    for (let i = 0; i < 4; i++) {
-                        const tooth = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                        tooth.setAttribute("x1", 75 + i * 15);
-                        tooth.setAttribute("y1", 130);
-                        tooth.setAttribute("x2", 75 + i * 15);
-                        tooth.setAttribute("y2", 138);
-                        tooth.setAttribute("stroke", "#2d3748");
-                        tooth.setAttribute("stroke-width", "2");
-                        svgElement.appendChild(tooth);
-                    }
+                    // Eyes
+                    drawEye(svgElement, 70, 85, false);
+                    drawEye(svgElement, 130, 85, false);
+                    // Angry mouth
+                    const angryMouth = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    angryMouth.setAttribute("x1", "70");
+                    angryMouth.setAttribute("y1", "135");
+                    angryMouth.setAttribute("x2", "130");
+                    angryMouth.setAttribute("y2", "135");
+                    angryMouth.setAttribute("stroke", "#2d3748");
+                    angryMouth.setAttribute("stroke-width", "4");
+                    angryMouth.setAttribute("stroke-linecap", "round");
+                    svgElement.appendChild(angryMouth);
                     break;
 
                 case "Surprised":
-                    // Highly raised eyebrows
-                    const sBrow1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    sBrow1.setAttribute("d", "M 50 55 Q 70 50 90 55");
-                    sBrow1.setAttribute("stroke", "#2d3748");
-                    sBrow1.setAttribute("stroke-width", "5");
-                    sBrow1.setAttribute("fill", "none");
-                    sBrow1.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(sBrow1);
-                    
-                    const sBrow2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    sBrow2.setAttribute("d", "M 110 55 Q 130 50 150 55");
-                    sBrow2.setAttribute("stroke", "#2d3748");
-                    sBrow2.setAttribute("stroke-width", "5");
-                    sBrow2.setAttribute("fill", "none");
-                    sBrow2.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(sBrow2);
-                    
-                    // Very wide eyes showing shock
-                    const eye1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    eye1.setAttribute("cx", "70");
-                    eye1.setAttribute("cy", "85");
-                    eye1.setAttribute("r", "15");
-                    eye1.setAttribute("fill", "white");
-                    eye1.setAttribute("stroke", "#2d3748");
-                    eye1.setAttribute("stroke-width", "3");
-                    svgElement.appendChild(eye1);
-                    
-                    const pupil1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    pupil1.setAttribute("cx", "70");
-                    pupil1.setAttribute("cy", "85");
-                    pupil1.setAttribute("r", "7");
-                    pupil1.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(pupil1);
-                    
-                    const eye2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    eye2.setAttribute("cx", "130");
-                    eye2.setAttribute("cy", "85");
-                    eye2.setAttribute("r", "15");
-                    eye2.setAttribute("fill", "white");
-                    eye2.setAttribute("stroke", "#2d3748");
-                    eye2.setAttribute("stroke-width", "3");
-                    svgElement.appendChild(eye2);
-                    
-                    const pupil2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    pupil2.setAttribute("cx", "130");
-                    pupil2.setAttribute("cy", "85");
-                    pupil2.setAttribute("r", "7");
-                    pupil2.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(pupil2);
-                    
-                    // Perfect O-shaped mouth for surprise
-                    const mouth = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-                    mouth.setAttribute("cx", "100");
-                    mouth.setAttribute("cy", "135");
-                    mouth.setAttribute("rx", "18");
-                    mouth.setAttribute("ry", "25");
-                    mouth.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(mouth);
+                    const img_surprised = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    img_surprised.setAttribute("href", "assets/surprised.png"); // adjust to your actual path
+                    img_surprised.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/surprised.png");
+                    img_surprised.setAttribute("x", "10");
+                    img_surprised.setAttribute("y", "10");
+                    img_surprised.setAttribute("width", "180");
+                    img_surprised.setAttribute("height", "180");
+                    img_surprised.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                    svgElement.appendChild(img_surprised);
+
+                    const title_surprised = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title_surprised.textContent = "Surprised";
+                    svgElement.appendChild(title_surprised);
                     break;
 
                 case "Scared":
-                    // Highly raised eyebrows showing shock/fear
-                    const wBrow1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    wBrow1.setAttribute("d", "M 50 60 Q 70 52 90 60");
-                    wBrow1.setAttribute("stroke", "#2d3748");
-                    wBrow1.setAttribute("stroke-width", "5");
-                    wBrow1.setAttribute("fill", "none");
-                    wBrow1.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(wBrow1);
-                    
-                    const wBrow2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    wBrow2.setAttribute("d", "M 110 60 Q 130 52 150 60");
-                    wBrow2.setAttribute("stroke", "#2d3748");
-                    wBrow2.setAttribute("stroke-width", "5");
-                    wBrow2.setAttribute("fill", "none");
-                    wBrow2.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(wBrow2);
-                    
-                    // "><" shaped eyes - left eye is ">", right eye is "<"
-                    // Left eye ">" shape
-                    const scaredEye1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    scaredEye1.setAttribute("d", "M 60 85 L 70 78 L 70 92 Z");
-                    scaredEye1.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(scaredEye1);
-                    
-                    // Right eye "<" shape
-                    const scaredEye2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    scaredEye2.setAttribute("d", "M 140 85 L 130 78 L 130 92 Z");
-                    scaredEye2.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(scaredEye2);
-                    
-                    // Wide open screaming mouth (like 😱)
-                    const wMouth = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-                    wMouth.setAttribute("cx", "100");
-                    wMouth.setAttribute("cy", "135");
-                    wMouth.setAttribute("rx", "20");
-                    wMouth.setAttribute("ry", "28");
-                    wMouth.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(wMouth);
+                    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    img.setAttribute("href", "assets/scared.png"); // adjust to your actual path
+                    img.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/scared.png");
+                    img.setAttribute("x", "10");
+                    img.setAttribute("y", "10");
+                    img.setAttribute("width", "180");
+                    img.setAttribute("height", "180");
+                    img.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                    svgElement.appendChild(img);
+
+                    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title.textContent = "Scared";
+                    svgElement.appendChild(title);
                     break;
 
                 case "Excited":
-                    // Raised eyebrows
-                    const eBrow1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    eBrow1.setAttribute("d", "M 55 60 Q 70 55 85 60");
-                    eBrow1.setAttribute("stroke", "#2d3748");
-                    eBrow1.setAttribute("stroke-width", "4");
-                    eBrow1.setAttribute("fill", "none");
-                    eBrow1.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(eBrow1);
-                    
-                    const eBrow2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    eBrow2.setAttribute("d", "M 115 60 Q 130 55 145 60");
-                    eBrow2.setAttribute("stroke", "#2d3748");
-                    eBrow2.setAttribute("stroke-width", "4");
-                    eBrow2.setAttribute("fill", "none");
-                    eBrow2.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(eBrow2);
-                    
-                    // Sparkling eyes
-                    drawEye(svgElement, 70, 80, true);
-                    drawEye(svgElement, 130, 80, true);
-                    
-                    // Big smile
-                    const bigSmile = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    bigSmile.setAttribute("d", "M 55 125 Q 100 160 145 125");
-                    bigSmile.setAttribute("stroke", "#2d3748");
-                    bigSmile.setAttribute("stroke-width", "4");
-                    bigSmile.setAttribute("fill", "none");
-                    bigSmile.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(bigSmile);
-                    
-                    // Sparkles
-                    drawSparkle(svgElement, 40, 40);
-                    drawSparkle(svgElement, 160, 50);
+                    const img_excited = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    img_excited.setAttribute("href", "assets/excited.png"); // adjust to your actual path
+                    img_excited.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/excited.png");
+                    img_excited.setAttribute("x", "10");
+                    img_excited.setAttribute("y", "10");
+                    img_excited.setAttribute("width", "180");
+                    img_excited.setAttribute("height", "180");
+                    img_excited.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                    svgElement.appendChild(img_excited);
+
+                    const title_excited = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title_excited.textContent = "Excited";
+                    svgElement.appendChild(title_excited);
                     break;
             }
         }
