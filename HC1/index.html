@@ -1089,38 +1089,18 @@
                     wBrow2.setAttribute("stroke-linecap", "round");
                     svgElement.appendChild(wBrow2);
                     
-                    // Very wide fearful eyes 
-                    const scaredEye1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    scaredEye1.setAttribute("cx", "70");
-                    scaredEye1.setAttribute("cy", "85");
-                    scaredEye1.setAttribute("r", "14");
-                    scaredEye1.setAttribute("fill", "white");
-                    scaredEye1.setAttribute("stroke", "#2d3748");
-                    scaredEye1.setAttribute("stroke-width", "3");
+                    // "><" shaped eyes - left eye is ">", right eye is "<"
+                    // Left eye ">" shape
+                    const scaredEye1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    scaredEye1.setAttribute("d", "M 60 85 L 70 78 L 70 92 Z");
+                    scaredEye1.setAttribute("fill", "#2d3748");
                     svgElement.appendChild(scaredEye1);
                     
-                    const scaredPupil1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    scaredPupil1.setAttribute("cx", "70");
-                    scaredPupil1.setAttribute("cy", "85");
-                    scaredPupil1.setAttribute("r", "4");
-                    scaredPupil1.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(scaredPupil1);
-                    
-                    const scaredEye2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    scaredEye2.setAttribute("cx", "130");
-                    scaredEye2.setAttribute("cy", "85");
-                    scaredEye2.setAttribute("r", "14");
-                    scaredEye2.setAttribute("fill", "white");
-                    scaredEye2.setAttribute("stroke", "#2d3748");
-                    scaredEye2.setAttribute("stroke-width", "3");
+                    // Right eye "<" shape
+                    const scaredEye2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    scaredEye2.setAttribute("d", "M 140 85 L 130 78 L 130 92 Z");
+                    scaredEye2.setAttribute("fill", "#2d3748");
                     svgElement.appendChild(scaredEye2);
-                    
-                    const scaredPupil2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    scaredPupil2.setAttribute("cx", "130");
-                    scaredPupil2.setAttribute("cy", "85");
-                    scaredPupil2.setAttribute("r", "4");
-                    scaredPupil2.setAttribute("fill", "#2d3748");
-                    svgElement.appendChild(scaredPupil2);
                     
                     // Wide open screaming mouth (like 😱)
                     const wMouth = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
