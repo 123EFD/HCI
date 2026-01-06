@@ -654,8 +654,8 @@
        </svg>
       </div>
       <div class="flashcard-back">
-       <div class="flashcard-question" id="card-question">
-        Is this face happy?
+       <div class="emotion-name" id="card-emotion-name">
+        Happy
        </div>
        <div class="flashcard-buttons">
         <button class="answer-button yes" onclick="handleFlashcardAnswer(true, event)">YES</button>
@@ -1222,7 +1222,7 @@
             const emotion = emotions[currentCardIndex];
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
-            document.getElementById('card-question').textContent = `Is this face ${emotion.name.toLowerCase()}?`;
+            document.getElementById('card-emotion-name').textContent = emotion.name;
             document.getElementById('card-feedback').textContent = '';
             document.getElementById('card-feedback').className = 'flashcard-feedback';
             
