@@ -654,8 +654,7 @@
        </svg>
       </div>
       <div class="flashcard-back">
-       <div class="flashcard-question" id="card-question">
-        Is this face happy?
+       <div class="emotion-name" id="card-emotion-name">
        </div>
        <div class="flashcard-buttons">
         <button class="answer-button yes" onclick="handleFlashcardAnswer(true, event)">YES</button>
@@ -1222,7 +1221,7 @@
             const emotion = emotions[currentCardIndex];
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
-            document.getElementById('card-question').textContent = `Is this face ${emotion.name.toLowerCase()}?`;
+            document.getElementById('card-emotion-name').textContent = emotion.name;
             document.getElementById('card-feedback').textContent = '';
             document.getElementById('card-feedback').className = 'flashcard-feedback';
             
@@ -1240,7 +1239,7 @@
             const feedback = document.getElementById('card-feedback');
             const buttons = document.querySelectorAll('.answer-button');
             
-            // Since the question always asks about the current emotion, YES is always correct
+            // Since the displayed emotion name matches the face shown, YES is always correct
             if (isYes) {
                 feedback.textContent = "Correct! 🌟";
                 feedback.className = 'flashcard-feedback correct';
