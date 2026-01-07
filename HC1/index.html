@@ -594,7 +594,6 @@
       <div class="flashcard-back">
        <div class="emotion-name" id="card-emotion-name">
        </div>
-       <div class="emotion-description" id="card-description"></div>
       </div>
      </div>
      <div class="flashcard-controls"><button class="control-button prev" onclick="previousCard()">← Previous</button> <button class="control-button" onclick="nextCard()">Next →</button>
@@ -1081,7 +1080,6 @@
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
             document.getElementById('card-emotion-name').textContent = emotion.name;
-            document.getElementById('card-description').textContent = emotion.description;
             
             document.getElementById('flashcard').classList.remove('flipped');
             isCardFlipped = false;
