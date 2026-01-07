@@ -193,68 +193,6 @@
             font-weight: bold;
         }
 
-        .flashcard-buttons {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .answer-button {
-            padding: 15px 40px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .answer-button.yes {
-            background: linear-gradient(135deg, #43e97b, #38f9d7);
-            color: white;
-        }
-
-        .answer-button.no {
-            background: linear-gradient(135deg, #f5576c, #f093fb);
-            color: white;
-        }
-
-        .answer-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .flashcard-feedback {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-top: 15px;
-            padding: 10px 20px;
-            border-radius: 10px;
-        }
-
-        .flashcard-feedback.correct {
-            color: #43e97b;
-            background: rgba(67, 233, 123, 0.2);
-        }
-
-        .flashcard-feedback.incorrect {
-            color: #f5576c;
-            background: rgba(245, 87, 108, 0.2);
-        }
-
-        .flashcard-completion {
-            text-align: center;
-            padding: 30px;
-            background: rgba(67, 233, 123, 0.2);
-            border: 3px solid #43e97b;
-            border-radius: 20px;
-            margin: 25px 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #43e97b;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
         .flashcard-controls {
             display: flex;
             gap: 20px;
@@ -656,11 +594,7 @@
       <div class="flashcard-back">
        <div class="emotion-name" id="card-emotion-name">
        </div>
-       <div class="flashcard-buttons">
-        <button class="answer-button yes" onclick="handleFlashcardAnswer(true, event)">YES</button>
-        <button class="answer-button no" onclick="handleFlashcardAnswer(false, event)">NO</button>
-       </div>
-       <div class="flashcard-feedback" id="card-feedback"></div>
+       <div class="emotion-description" id="card-description"></div>
       </div>
      </div>
      <div class="flashcard-controls"><button class="control-button prev" onclick="previousCard()">← Previous</button> <button class="control-button" onclick="nextCard()">Next →</button>
@@ -767,8 +701,6 @@
         let questionAnswered = false;
         let audioContext = null;
         let usedQuizEmotions = [];
-        let completedFlashcards = new Set();
-        let flashcardsCompleted = false;
         let currentAudio = null;  // Track currently playing audio
 
         // Sound file mappings for each emotion
@@ -1115,14 +1047,7 @@
         function showFlashcards() {
             hideAllScreens();
             document.getElementById('flashcards-screen').classList.add('active');
-            // Reset flashcard state when entering the section
-            completedFlashcards = new Set();
-            flashcardsCompleted = false;
             currentCardIndex = 0;
-            // Remove any existing completion message
-            const container = document.querySelector('.flashcard-container');
-            const existingCompletion = container.querySelector('.flashcard-completion');
-            if (existingCompletion) existingCompletion.remove();
             updateFlashcard();
         }
 
@@ -1156,54 +1081,10 @@
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
             document.getElementById('card-emotion-name').textContent = emotion.name;
-            document.getElementById('card-feedback').textContent = '';
-            document.getElementById('card-feedback').className = 'flashcard-feedback';
-            
-            // Enable answer buttons
-            const buttons = document.querySelectorAll('.answer-button');
-            buttons.forEach(btn => btn.disabled = false);
+            document.getElementById('card-description').textContent = emotion.description;
             
             document.getElementById('flashcard').classList.remove('flipped');
             isCardFlipped = false;
-        }
-
-        function handleFlashcardAnswer(isYes, event) {
-            event.stopPropagation(); // Prevent card from flipping when clicking buttons
-            
-            const feedback = document.getElementById('card-feedback');
-            const buttons = document.querySelectorAll('.answer-button');
-            
-            // Since the displayed emotion name matches the face shown, YES is always correct
-            if (isYes) {
-                feedback.textContent = "Correct! 🌟";
-                feedback.className = 'flashcard-feedback correct';
-                completedFlashcards.add(currentCardIndex);
-                
-                // Check if all flashcards are completed
-                if (completedFlashcards.size === emotions.length && !flashcardsCompleted) {
-                    flashcardsCompleted = true;
-                    setTimeout(() => {
-                        showFlashcardCompletion();
-                    }, 1000);
-                }
-            } else {
-                feedback.textContent = "Try again! Press YES 😊";
-                feedback.className = 'flashcard-feedback incorrect';
-            }
-            
-            // Disable buttons after answering
-            buttons.forEach(btn => btn.disabled = true);
-        }
-
-        function showFlashcardCompletion() {
-            const container = document.querySelector('.flashcard-container');
-            const existingCompletion = container.querySelector('.flashcard-completion');
-            if (existingCompletion) return;
-            
-            const completionDiv = document.createElement('div');
-            completionDiv.className = 'flashcard-completion';
-            completionDiv.textContent = 'Yay, you have completed the flashcards section!';
-            container.appendChild(completionDiv);
         }
 
         function flipCard() {
