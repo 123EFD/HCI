@@ -1081,10 +1081,7 @@
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
             document.getElementById('card-emotion-name').textContent = emotion.name;
-            const descElement = document.getElementById('card-description');
-            if (descElement) {
-                descElement.textContent = emotion.description;
-            }
+            document.getElementById('card-description').textContent = emotion.description;
             
             document.getElementById('flashcard').classList.remove('flipped');
             isCardFlipped = false;
