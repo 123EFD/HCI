@@ -737,11 +737,10 @@
        </div>
       </div>
      </div>
-     <div class="flashcard-controls"><button class="control-button prev" onclick="previousCard()">← Previous</button> <button class="control-button" onclick="nextCard()">Next →</button>
+     <div class="flashcard-controls"><button class="control-button prev" onclick="previousCard()" data-translate="previous">← Previous</button> <button class="control-button" onclick="nextCard()" data-translate="next">Next →</button>
      </div>
      <div class="navigation-buttons">
       <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
-      <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
      </div>
     </div>
    </div><!-- Drag & Drop Matching Game Screen -->
@@ -774,7 +773,6 @@
     </div>
     <div class="navigation-buttons">
      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
-     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
     </div>
    </div><!-- Quiz Screen -->
    <div id="quiz-screen" class="game-screen">
@@ -798,7 +796,6 @@
     <div class="quiz-feedback" id="quiz-feedback"></div><button class="next-question-button" id="next-question" onclick="nextQuestion()" disabled> Next Question </button>
     <div class="navigation-buttons">
      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
-     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
     </div>
    </div><!-- Soundboard Screen -->
    <div id="soundboard-screen" class="game-screen">
@@ -815,7 +812,6 @@
     </div>
     <div class="navigation-buttons">
      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
-     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
     </div>
    </div>
   </div>
@@ -839,6 +835,8 @@
                 'nav-help-matching': 'Drag facial expressions to match emotion names! Match all 6 to complete.',
                 'nav-help-quiz': 'Look at the face and choose the correct emotion! Answer all 10 questions.',
                 'nav-help-soundboard': 'Click on each emotion card to hear how it sounds! Explore all emotions.',
+                'previous': '← Previous',
+                'next': 'Next →',
                 'Happy': 'Happy',
                 'Sad': 'Sad',
                 'Angry': 'Angry',
@@ -872,6 +870,8 @@
                 'nav-help-matching': 'Seret ekspresi muka untuk dipadankan dengan nama emosi! Padankan semua 6 untuk selesai.',
                 'nav-help-quiz': 'Lihat wajah dan pilih emosi yang betul! Jawab semua 10 soalan.',
                 'nav-help-soundboard': 'Klik pada setiap kad emosi untuk mendengar bunyinya! Terokai semua emosi.',
+                'previous': '← Sebelumnya',
+                'next': 'Seterusnya →',
                 'Happy': 'Gembira',
                 'Sad': 'Sedih',
                 'Angry': 'Marah',
@@ -905,6 +905,8 @@
                 'nav-help-matching': '拖动面部表情与情绪名称匹配！匹配全部6个即可完成。',
                 'nav-help-quiz': '看脸部并选择正确的情绪！回答全部10个问题。',
                 'nav-help-soundboard': '点击每个情绪卡以听听它的声音！探索所有情绪。',
+                'previous': '← 上一个',
+                'next': '下一个 →',
                 'Happy': '快乐',
                 'Sad': '悲伤',
                 'Angry': '生气',
@@ -924,6 +926,13 @@
                 'scared-sound': '紧张和害怕的声音',
                 'excited-sound': '充满活力和热情的声音'
             }
+        };
+        
+        // Shared Yes/No translations for quiz
+        const yesNoTranslations = {
+            en: { Yes: 'Yes', No: 'No' },
+            ms: { Yes: 'Ya', No: 'Tidak' },
+            zh: { Yes: '是', No: '否' }
         };
 
         // Function to change language
@@ -1015,6 +1024,60 @@
                     updateFlashcard();
                 } else if (activeScreen.id === 'soundboard-screen') {
                     initSoundboard();
+                } else if (activeScreen.id === 'matching-screen') {
+                    // Refresh matching game drop zones with translated names
+                    refreshMatchingGameTranslations();
+                } else if (activeScreen.id === 'quiz-screen') {
+                    // Refresh quiz with translated emotion name
+                    refreshQuizTranslations();
+                }
+            }
+        }
+        
+        // Function to refresh matching game translations
+        function refreshMatchingGameTranslations() {
+            const dropZones = document.querySelectorAll('.drop-zone:not(.matched)');
+            dropZones.forEach(zone => {
+                const emotionName = zone.dataset.emotion;
+                const emotion = emotions.find(e => e.name === emotionName);
+                if (emotion) {
+                    zone.textContent = emotion.translatedName;
+                }
+            });
+            
+            // Also update matched drop zones that have text nodes
+            const matchedZones = document.querySelectorAll('.drop-zone.matched');
+            matchedZones.forEach(zone => {
+                const emotionName = zone.dataset.emotion;
+                const emotion = emotions.find(e => e.name === emotionName);
+                if (emotion) {
+                    // Find the text node and update it
+                    const textNodes = Array.from(zone.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+                    if (textNodes.length > 0) {
+                        textNodes[0].textContent = emotion.translatedName;
+                    }
+                }
+            });
+        }
+        
+        // Function to refresh quiz translations
+        function refreshQuizTranslations() {
+            if (currentQuestionIndex < quizQuestions.length) {
+                const question = quizQuestions[currentQuestionIndex];
+                const emotion = emotions.find(e => e.name === question.emotion);
+                if (emotion) {
+                    document.querySelector('.quiz-prompt').textContent = emotion.translatedName;
+                }
+                
+                // Update Yes/No options if question hasn't been answered yet
+                if (!questionAnswered) {
+                    const options = document.querySelectorAll('.quiz-option');
+                    options.forEach(option => {
+                        const optionValue = option.dataset.value;
+                        if (optionValue && yesNoTranslations[currentLanguage][optionValue]) {
+                            option.textContent = yesNoTranslations[currentLanguage][optionValue];
+                        }
+                    });
                 }
             }
         }
@@ -1888,13 +1951,6 @@
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
             
-            // Translate options
-            const yesNoTranslations = {
-                en: { Yes: 'Yes', No: 'No' },
-                ms: { Yes: 'Ya', No: 'Tidak' },
-                zh: { Yes: '是', No: '否' }
-            };
-            
             question.options.forEach(option => {
                 const button = document.createElement('button');
                 button.className = 'quiz-option';
@@ -1916,13 +1972,6 @@
             questionAnswered = true;
             const options = document.querySelectorAll('.quiz-option');
             const feedback = document.getElementById('quiz-feedback');
-            
-            // Translate Yes/No for display
-            const yesNoTranslations = {
-                en: { Yes: 'Yes', No: 'No' },
-                ms: { Yes: 'Ya', No: 'Tidak' },
-                zh: { Yes: '是', No: '否' }
-            };
             
             options.forEach(option => {
                 const optionValue = option.dataset.value;
