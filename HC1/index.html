@@ -613,6 +613,7 @@
             gap: 15px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .menu-return-button {
@@ -670,6 +671,31 @@
 
             .soundboard-grid {
                 grid-template-columns: 1fr;
+            }
+
+            /* Mobile language selector */
+            .language-selector {
+                top: 10px;
+                right: 10px;
+                padding: 8px;
+                gap: 8px;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .language-button {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            /* Mobile navigation buttons */
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .menu-return-button {
+                width: 100%;
             }
         }
     </style>
@@ -993,14 +1019,25 @@
             }
         }
 
+        // Language configuration
+        const languageConfig = {
+            en: {
+                code: 'en-US',
+                name: 'English'
+            },
+            ms: {
+                code: 'ms-MY',
+                name: 'Bahasa Melayu'
+            },
+            zh: {
+                code: 'zh-CN',
+                name: '中文'
+            }
+        };
+
         // Helper function to get language code for TTS
         function getLanguageCode() {
-            const languageCodes = {
-                'ms': 'ms-MY',
-                'zh': 'zh-CN',
-                'en': 'en-US'
-            };
-            return languageCodes[currentLanguage] || 'en-US';
+            return languageConfig[currentLanguage]?.code || 'en-US';
         }
 
         // Text-to-Speech function
@@ -1034,10 +1071,17 @@
                 btn.classList.add('playing');
             });
             
-            utterance.onend = () => {
+            // Reset UI state on completion or error
+            const resetButtons = () => {
                 voiceButtons.forEach(btn => {
                     btn.classList.remove('playing');
                 });
+            };
+            
+            utterance.onend = resetButtons;
+            utterance.onerror = (event) => {
+                console.warn('Speech synthesis error:', event.error);
+                resetButtons();
             };
             
             window.speechSynthesis.speak(utterance);
