@@ -389,6 +389,16 @@
             100% { transform: scale(1); }
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
         .quiz-feedback {
             text-align: center;
             font-size: 1.3rem;
@@ -910,20 +920,25 @@
         function updateTranslations() {
             const lang = translations[currentLanguage];
             
-            // Update main UI elements - get text content from data attributes or direct update
+            // Helper function to safely update text node
+            const safeUpdateTextNode = (element, newText) => {
+                if (!element) return;
+                const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                if (textNode) {
+                    textNode.textContent = newText;
+                } else {
+                    // If no text node exists, create one as the first child
+                    const newTextNode = document.createTextNode(newText);
+                    element.insertBefore(newTextNode, element.firstChild);
+                }
+            };
+            
+            // Update main UI elements
             const gameTitle = document.getElementById('game-title');
             const welcomeMsg = document.getElementById('welcome-message');
             
-            // Store original text in data attributes if not already set
-            if (!gameTitle.dataset.text) gameTitle.dataset.text = gameTitle.childNodes[0].textContent;
-            if (!welcomeMsg.dataset.text) welcomeMsg.dataset.text = welcomeMsg.childNodes[0].textContent;
-            
-            // Update text while preserving voice button
-            const titleTextNode = Array.from(gameTitle.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-            const msgTextNode = Array.from(welcomeMsg.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-            
-            if (titleTextNode) titleTextNode.textContent = lang['game-title'];
-            if (msgTextNode) msgTextNode.textContent = lang['welcome-message'];
+            safeUpdateTextNode(gameTitle, lang['game-title']);
+            safeUpdateTextNode(welcomeMsg, lang['welcome-message']);
             
             document.getElementById('flashcard-btn').textContent = lang['flashcard-btn'];
             document.getElementById('matching-btn').textContent = lang['matching-btn'];
@@ -934,8 +949,7 @@
             const updateNavHelp = (id, key) => {
                 const elem = document.getElementById(id);
                 if (elem) {
-                    const textNode = Array.from(elem.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                    if (textNode) textNode.textContent = lang[key];
+                    safeUpdateTextNode(elem, lang[key]);
                 }
             };
             
@@ -979,6 +993,16 @@
             }
         }
 
+        // Helper function to get language code for TTS
+        function getLanguageCode() {
+            const languageCodes = {
+                'ms': 'ms-MY',
+                'zh': 'zh-CN',
+                'en': 'en-US'
+            };
+            return languageCodes[currentLanguage] || 'en-US';
+        }
+
         // Text-to-Speech function
         function speakText(elementId) {
             const element = document.getElementById(elementId);
@@ -1000,16 +1024,7 @@
             
             // Create utterance
             const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Set language based on current selection
-            if (currentLanguage === 'ms') {
-                utterance.lang = 'ms-MY'; // Malay
-            } else if (currentLanguage === 'zh') {
-                utterance.lang = 'zh-CN'; // Chinese
-            } else {
-                utterance.lang = 'en-US'; // English
-            }
-            
+            utterance.lang = getLanguageCode();
             utterance.rate = 0.9;
             utterance.pitch = 1;
             
@@ -1037,16 +1052,7 @@
             
             // Create utterance
             const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Set language based on current selection
-            if (currentLanguage === 'ms') {
-                utterance.lang = 'ms-MY';
-            } else if (currentLanguage === 'zh') {
-                utterance.lang = 'zh-CN';
-            } else {
-                utterance.lang = 'en-US';
-            }
-            
+            utterance.lang = getLanguageCode();
             utterance.rate = 0.9;
             utterance.pitch = 1;
             
@@ -1055,15 +1061,40 @@
 
         // Function to return to module menu (placeholder - could navigate to parent page)
         function returnToModuleMenu() {
-            // This would typically navigate to a parent module menu page
-            // For now, we'll show an alert
+            // Show a styled notification instead of alert
             const messages = {
                 en: 'Returning to Module Menu...',
                 ms: 'Kembali ke Menu Modul...',
                 zh: '返回模块菜单...'
             };
-            alert(messages[currentLanguage]);
-            // In a real implementation, this might be:
+            
+            // Create and show a toast notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #43e97b, #38f9d7);
+                color: white;
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 1.2rem;
+                font-weight: bold;
+                box-shadow: 0 10px 30px rgba(67, 233, 123, 0.4);
+                z-index: 10000;
+                animation: fadeIn 0.3s ease-in-out;
+            `;
+            notification.textContent = messages[currentLanguage];
+            document.body.appendChild(notification);
+            
+            // Remove notification after 2 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease-in-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+            
+            // In a real implementation, this might navigate to a parent page:
             // window.location.href = '../module-menu.html';
         }
 
