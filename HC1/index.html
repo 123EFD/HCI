@@ -769,7 +769,7 @@
       </div>
      </div>
     </div>
-    <div style="text-align: center; margin-top: 25px;"><button class="control-button" onclick="resetMatchingGame()">🔄 New Game</button>
+    <div style="text-align: center; margin-top: 25px;"><button class="control-button" id="new-game-btn" onclick="resetMatchingGame()">🔄 New Game</button>
     </div>
     <div class="navigation-buttons">
      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
@@ -854,7 +854,9 @@
                 'angry-sound': 'Frustrated and upset voice',
                 'surprised-sound': 'Gasping with amazement',
                 'scared-sound': 'Nervous and frightened voice',
-                'excited-sound': 'Energetic and enthusiastic voice'
+                'excited-sound': 'Energetic and enthusiastic voice',
+                'new-game': '🔄 New Game',
+                'next-question': 'Next Question'
             },
             ms: {
                 'game-title': 'Permainan Pembelajaran Emosi',
@@ -889,7 +891,9 @@
                 'angry-sound': 'Suara kecewa dan marah',
                 'surprised-sound': 'Terkejut dengan kagum',
                 'scared-sound': 'Suara gugup dan takut',
-                'excited-sound': 'Suara bertenaga dan bersemangat'
+                'excited-sound': 'Suara bertenaga dan bersemangat',
+                'new-game': '🔄 Permainan Baru',
+                'next-question': 'Soalan Seterusnya'
             },
             zh: {
                 'game-title': '情绪学习游戏',
@@ -924,7 +928,9 @@
                 'angry-sound': '沮丧和不安的声音',
                 'surprised-sound': '惊讶的喘息',
                 'scared-sound': '紧张和害怕的声音',
-                'excited-sound': '充满活力和热情的声音'
+                'excited-sound': '充满活力和热情的声音',
+                'new-game': '🔄 新游戏',
+                'next-question': '下一个问题'
             }
         };
         
@@ -992,6 +998,18 @@
             updateNavHelp('nav-help-matching', 'nav-help-matching');
             updateNavHelp('nav-help-quiz', 'nav-help-quiz');
             updateNavHelp('nav-help-soundboard', 'nav-help-soundboard');
+            
+            // Update New Game button in Matching Game
+            const newGameBtn = document.getElementById('new-game-btn');
+            if (newGameBtn) {
+                newGameBtn.textContent = lang['new-game'];
+            }
+            
+            // Update Next Question button in Quiz (only if not showing "Play Again")
+            const nextQuestionBtn = document.getElementById('next-question');
+            if (nextQuestionBtn && quizQuestions && currentQuestionIndex < quizQuestions.length) {
+                nextQuestionBtn.textContent = lang['next-question'];
+            }
             
             // Update all data-translate elements
             document.querySelectorAll('[data-translate]').forEach(elem => {
