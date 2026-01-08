@@ -910,27 +910,39 @@
         function updateTranslations() {
             const lang = translations[currentLanguage];
             
-            // Update main UI elements
-            document.getElementById('game-title').childNodes[0].textContent = lang['game-title'];
-            document.getElementById('welcome-message').childNodes[0].textContent = lang['welcome-message'];
+            // Update main UI elements - get text content from data attributes or direct update
+            const gameTitle = document.getElementById('game-title');
+            const welcomeMsg = document.getElementById('welcome-message');
+            
+            // Store original text in data attributes if not already set
+            if (!gameTitle.dataset.text) gameTitle.dataset.text = gameTitle.childNodes[0].textContent;
+            if (!welcomeMsg.dataset.text) welcomeMsg.dataset.text = welcomeMsg.childNodes[0].textContent;
+            
+            // Update text while preserving voice button
+            const titleTextNode = Array.from(gameTitle.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+            const msgTextNode = Array.from(welcomeMsg.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+            
+            if (titleTextNode) titleTextNode.textContent = lang['game-title'];
+            if (msgTextNode) msgTextNode.textContent = lang['welcome-message'];
+            
             document.getElementById('flashcard-btn').textContent = lang['flashcard-btn'];
             document.getElementById('matching-btn').textContent = lang['matching-btn'];
             document.getElementById('quiz-btn').textContent = lang['quiz-btn'];
             document.getElementById('soundboard-btn').textContent = lang['soundboard-btn'];
             
             // Update navigation help texts
-            if (document.getElementById('nav-help-flashcards')) {
-                document.getElementById('nav-help-flashcards').childNodes[0].textContent = lang['nav-help-flashcards'];
-            }
-            if (document.getElementById('nav-help-matching')) {
-                document.getElementById('nav-help-matching').childNodes[0].textContent = lang['nav-help-matching'];
-            }
-            if (document.getElementById('nav-help-quiz')) {
-                document.getElementById('nav-help-quiz').childNodes[0].textContent = lang['nav-help-quiz'];
-            }
-            if (document.getElementById('nav-help-soundboard')) {
-                document.getElementById('nav-help-soundboard').childNodes[0].textContent = lang['nav-help-soundboard'];
-            }
+            const updateNavHelp = (id, key) => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    const textNode = Array.from(elem.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                    if (textNode) textNode.textContent = lang[key];
+                }
+            };
+            
+            updateNavHelp('nav-help-flashcards', 'nav-help-flashcards');
+            updateNavHelp('nav-help-matching', 'nav-help-matching');
+            updateNavHelp('nav-help-quiz', 'nav-help-quiz');
+            updateNavHelp('nav-help-soundboard', 'nav-help-soundboard');
             
             // Update all data-translate elements
             document.querySelectorAll('[data-translate]').forEach(elem => {
@@ -972,9 +984,16 @@
             const element = document.getElementById(elementId);
             if (!element) return;
             
-            // Get text content without the button
-            let text = element.childNodes[0] ? element.childNodes[0].textContent : element.textContent;
+            // Get text content - find text nodes and concatenate them
+            let text = '';
+            for (let node of element.childNodes) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    text += node.textContent;
+                }
+            }
             text = text.trim();
+            
+            if (!text) return;
             
             // Stop any ongoing speech
             window.speechSynthesis.cancel();
@@ -1052,59 +1071,48 @@
         const emotions = [
             {
                 name: "Happy",
-                translatedName: "Happy",
                 description: "A feeling of joy and contentment. You might feel happy when something good happens!",
-                translatedDescription: "A feeling of joy and contentment. You might feel happy when something good happens!",
                 soundDescription: "Laughing and cheerful voice",
-                translatedSoundDescription: "Laughing and cheerful voice",
                 color: "#FFD93D"
             },
             {
                 name: "Sad",
-                translatedName: "Sad",
                 description: "A feeling of sorrow or unhappiness. People feel sad when something disappointing happens.",
-                translatedDescription: "A feeling of sorrow or unhappiness. People feel sad when something disappointing happens.",
                 soundDescription: "Soft crying and sighing",
-                translatedSoundDescription: "Soft crying and sighing",
                 color: "#6C9BCF"
             },
             {
                 name: "Angry",
-                translatedName: "Angry",
                 description: "A strong feeling of displeasure. You might feel angry when something unfair happens.",
-                translatedDescription: "A strong feeling of displeasure. You might feel angry when something unfair happens.",
                 soundDescription: "Frustrated and upset voice",
-                translatedSoundDescription: "Frustrated and upset voice",
                 color: "#FF6B6B"
             },
             {
                 name: "Surprised",
-                translatedName: "Surprised",
                 description: "A feeling when something unexpected happens. Surprise can be good or bad!",
-                translatedDescription: "A feeling when something unexpected happens. Surprise can be good or bad!",
                 soundDescription: "Gasping with amazement",
-                translatedSoundDescription: "Gasping with amazement",
                 color: "#A8E6CF"
             },
             {
                 name: "Scared",
-                translatedName: "Scared",
                 description: "A feeling of fear or worry. People feel scared when they sense danger.",
-                translatedDescription: "A feeling of fear or worry. People feel scared when they sense danger.",
                 soundDescription: "Nervous and frightened voice",
-                translatedSoundDescription: "Nervous and frightened voice",
                 color: "#B4A7D6"
             },
             {
                 name: "Excited",
-                translatedName: "Excited",
                 description: "A feeling of enthusiasm and energy. You feel excited when looking forward to something!",
-                translatedDescription: "A feeling of enthusiasm and energy. You feel excited when looking forward to something!",
                 soundDescription: "Energetic and enthusiastic voice",
-                translatedSoundDescription: "Energetic and enthusiastic voice",
                 color: "#FFB6C1"
             }
         ];
+        
+        // Initialize translated properties
+        emotions.forEach(emotion => {
+            emotion.translatedName = emotion.name;
+            emotion.translatedDescription = emotion.description;
+            emotion.translatedSoundDescription = emotion.soundDescription;
+        });
 
         // Game state
         let currentCardIndex = 0;
