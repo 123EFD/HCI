@@ -523,6 +523,109 @@
             animation: pulse 2s ease-in-out infinite;
         }
 
+        /* Language Selector Styles */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .language-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .language-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .language-button.active {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border-color: #43e97b;
+        }
+
+        /* Voice Button Styles */
+        .voice-button {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .voice-button.playing {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Navigation Help Styles */
+        .navigation-help {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #667eea;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .menu-return-button {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .menu-return-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .menu-return-button.module-menu {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -565,16 +668,28 @@
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
+  <!-- Language Selector -->
+  <div class="language-selector">
+   <button class="language-button active" onclick="changeLanguage('en')" data-lang="en">English</button>
+   <button class="language-button" onclick="changeLanguage('ms')" data-lang="ms">Bahasa Melayu</button>
+   <button class="language-button" onclick="changeLanguage('zh')" data-lang="zh">中文</button>
+  </div>
+
   <div class="container">
    <div id="main-menu" class="game-screen active">
     <div class="header">
-     <h1 class="title" id="game-title">Emotion Learning Game</h1>
-     <p class="subtitle" id="welcome-message">Learn to recognize and name emotions!</p>
+     <h1 class="title" id="game-title">Emotion Learning Game<button class="voice-button" onclick="speakText('game-title')" title="Listen">🔊</button></h1>
+     <p class="subtitle" id="welcome-message">Learn to recognize and name emotions!<button class="voice-button" onclick="speakText('welcome-message')" title="Listen">🔊</button></p>
     </div>
     <div class="game-menu"><button class="menu-button" onclick="showFlashcards()" id="flashcard-btn"> 🎴 Flashcards </button> <button class="menu-button secondary" onclick="showMatchingGame()" id="matching-btn"> 🎯 Matching Game </button> <button class="menu-button tertiary" onclick="showQuiz()" id="quiz-btn"> 🧠 Expression Quiz </button> <button class="menu-button quaternary" onclick="showSoundboard()" id="soundboard-btn"> 🎤 Voice Soundboard </button>
     </div>
    </div><!-- Flashcards Screen -->
-   <div id="flashcards-screen" class="game-screen"><button class="back-button" onclick="showMainMenu()">← Back to Menu</button>
+   <div id="flashcards-screen" class="game-screen">
+    <div class="navigation-help" id="nav-help-flashcards">
+     Click cards to flip and learn emotions! Use navigation buttons below to return to menus.
+     <button class="voice-button" onclick="speakText('nav-help-flashcards')" title="Listen">🔊</button>
+    </div>
+    <button class="back-button" onclick="showMainMenu()">← <span data-translate="back-to-submenu">Back to Sub-module Menu</span></button>
     <div class="flashcard-container">
      <div class="flashcard" id="flashcard" onclick="flipCard()">
       <div class="flashcard-front">
@@ -588,9 +703,18 @@
      </div>
      <div class="flashcard-controls"><button class="control-button prev" onclick="previousCard()">← Previous</button> <button class="control-button" onclick="nextCard()">Next →</button>
      </div>
+     <div class="navigation-buttons">
+      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
+      <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
+     </div>
     </div>
    </div><!-- Drag & Drop Matching Game Screen -->
-   <div id="matching-screen" class="game-screen"><button class="back-button" onclick="showMainMenu()">← Back to Menu</button>
+   <div id="matching-screen" class="game-screen">
+    <div class="navigation-help" id="nav-help-matching">
+     Drag facial expressions to match emotion names! Match all 6 to complete.
+     <button class="voice-button" onclick="speakText('nav-help-matching')" title="Listen">🔊</button>
+    </div>
+    <button class="back-button" onclick="showMainMenu()">← <span data-translate="back-to-submenu">Back to Sub-module Menu</span></button>
     <div class="score-display">
      Score: <span id="matching-score">0</span> | Matches: <span id="matches-count">0</span>/6
     </div>
@@ -612,8 +736,17 @@
     </div>
     <div style="text-align: center; margin-top: 25px;"><button class="control-button" onclick="resetMatchingGame()">🔄 New Game</button>
     </div>
+    <div class="navigation-buttons">
+     <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
+     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
+    </div>
    </div><!-- Quiz Screen -->
-   <div id="quiz-screen" class="game-screen"><button class="back-button" onclick="showMainMenu()">← Back to Menu</button>
+   <div id="quiz-screen" class="game-screen">
+    <div class="navigation-help" id="nav-help-quiz">
+     Look at the face and choose the correct emotion! Answer all 10 questions.
+     <button class="voice-button" onclick="speakText('nav-help-quiz')" title="Listen">🔊</button>
+    </div>
+    <button class="back-button" onclick="showMainMenu()">← <span data-translate="back-to-submenu">Back to Sub-module Menu</span></button>
     <div class="score-display">
      Question <span id="question-number">1</span> of 10 | Score: <span id="quiz-score">0</span>
     </div>
@@ -627,53 +760,348 @@
     <div class="quiz-options" id="quiz-options"><!-- Options will be generated by JavaScript -->
     </div>
     <div class="quiz-feedback" id="quiz-feedback"></div><button class="next-question-button" id="next-question" onclick="nextQuestion()" disabled> Next Question </button>
+    <div class="navigation-buttons">
+     <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
+     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
+    </div>
    </div><!-- Soundboard Screen -->
-   <div id="soundboard-screen" class="game-screen"><button class="back-button" onclick="showMainMenu()">← Back to Menu</button>
+   <div id="soundboard-screen" class="game-screen">
+    <div class="navigation-help" id="nav-help-soundboard">
+     Click on each emotion card to hear how it sounds! Explore all emotions.
+     <button class="voice-button" onclick="speakText('nav-help-soundboard')" title="Listen">🔊</button>
+    </div>
+    <button class="back-button" onclick="showMainMenu()">← <span data-translate="back-to-submenu">Back to Sub-module Menu</span></button>
     <div class="soundboard-controls">
      <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">🎤 Human Voice Soundboard</h2>
      <p style="text-align: center; color: #718096; margin-bottom: 20px;">Click on each emotion to hear how it sounds with human voice!</p>
     </div>
     <div class="soundboard-grid" id="soundboard-grid"><!-- Sound cards will be generated by JavaScript -->
     </div>
+    <div class="navigation-buttons">
+     <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
+     <button class="menu-return-button module-menu" onclick="returnToModuleMenu()"><span data-translate="return-module">Return to Module Menu</span></button>
+    </div>
    </div>
   </div>
   <script>
+        // Current language
+        let currentLanguage = 'en';
+
+        // Translation data for UI elements
+        const translations = {
+            en: {
+                'game-title': 'Emotion Learning Game',
+                'welcome-message': 'Learn to recognize and name emotions!',
+                'flashcard-btn': '🎴 Flashcards',
+                'matching-btn': '🎯 Matching Game',
+                'quiz-btn': '🧠 Expression Quiz',
+                'soundboard-btn': '🎤 Voice Soundboard',
+                'back-to-submenu': 'Back to Sub-module Menu',
+                'return-submenu': 'Return to Sub-module Menu',
+                'return-module': 'Return to Module Menu',
+                'nav-help-flashcards': 'Click cards to flip and learn emotions! Use navigation buttons below to return to menus.',
+                'nav-help-matching': 'Drag facial expressions to match emotion names! Match all 6 to complete.',
+                'nav-help-quiz': 'Look at the face and choose the correct emotion! Answer all 10 questions.',
+                'nav-help-soundboard': 'Click on each emotion card to hear how it sounds! Explore all emotions.',
+                'Happy': 'Happy',
+                'Sad': 'Sad',
+                'Angry': 'Angry',
+                'Surprised': 'Surprised',
+                'Scared': 'Scared',
+                'Excited': 'Excited',
+                'happy-description': 'A feeling of joy and contentment. You might feel happy when something good happens!',
+                'sad-description': 'A feeling of sorrow or unhappiness. People feel sad when something disappointing happens.',
+                'angry-description': 'A strong feeling of displeasure. You might feel angry when something unfair happens.',
+                'surprised-description': 'A feeling when something unexpected happens. Surprise can be good or bad!',
+                'scared-description': 'A feeling of fear or worry. People feel scared when they sense danger.',
+                'excited-description': 'A feeling of enthusiasm and energy. You feel excited when looking forward to something!',
+                'happy-sound': 'Laughing and cheerful voice',
+                'sad-sound': 'Soft crying and sighing',
+                'angry-sound': 'Frustrated and upset voice',
+                'surprised-sound': 'Gasping with amazement',
+                'scared-sound': 'Nervous and frightened voice',
+                'excited-sound': 'Energetic and enthusiastic voice'
+            },
+            ms: {
+                'game-title': 'Permainan Pembelajaran Emosi',
+                'welcome-message': 'Belajar mengenal dan menamakan emosi!',
+                'flashcard-btn': '🎴 Kad Imbasan',
+                'matching-btn': '🎯 Permainan Padanan',
+                'quiz-btn': '🧠 Kuiz Ekspresi',
+                'soundboard-btn': '🎤 Papan Suara',
+                'back-to-submenu': 'Kembali ke Menu Sub-modul',
+                'return-submenu': 'Kembali ke Menu Sub-modul',
+                'return-module': 'Kembali ke Menu Modul',
+                'nav-help-flashcards': 'Klik kad untuk membalik dan belajar emosi! Gunakan butang navigasi di bawah untuk kembali ke menu.',
+                'nav-help-matching': 'Seret ekspresi muka untuk dipadankan dengan nama emosi! Padankan semua 6 untuk selesai.',
+                'nav-help-quiz': 'Lihat wajah dan pilih emosi yang betul! Jawab semua 10 soalan.',
+                'nav-help-soundboard': 'Klik pada setiap kad emosi untuk mendengar bunyinya! Terokai semua emosi.',
+                'Happy': 'Gembira',
+                'Sad': 'Sedih',
+                'Angry': 'Marah',
+                'Surprised': 'Terkejut',
+                'Scared': 'Takut',
+                'Excited': 'Teruja',
+                'happy-description': 'Perasaan gembira dan puas hati. Anda mungkin merasa gembira apabila sesuatu yang baik berlaku!',
+                'sad-description': 'Perasaan dukacita atau tidak gembira. Orang merasa sedih apabila sesuatu yang mengecewakan berlaku.',
+                'angry-description': 'Perasaan tidak puas hati yang kuat. Anda mungkin merasa marah apabila sesuatu yang tidak adil berlaku.',
+                'surprised-description': 'Perasaan apabila sesuatu yang tidak dijangka berlaku. Kejutan boleh jadi baik atau buruk!',
+                'scared-description': 'Perasaan takut atau bimbang. Orang merasa takut apabila mereka merasakan bahaya.',
+                'excited-description': 'Perasaan bersemangat dan bertenaga. Anda merasa teruja apabila menantikan sesuatu!',
+                'happy-sound': 'Suara ketawa dan ceria',
+                'sad-sound': 'Tangisan lembut dan mengeluh',
+                'angry-sound': 'Suara kecewa dan marah',
+                'surprised-sound': 'Terkejut dengan kagum',
+                'scared-sound': 'Suara gugup dan takut',
+                'excited-sound': 'Suara bertenaga dan bersemangat'
+            },
+            zh: {
+                'game-title': '情绪学习游戏',
+                'welcome-message': '学习识别和命名情绪！',
+                'flashcard-btn': '🎴 抽认卡',
+                'matching-btn': '🎯 配对游戏',
+                'quiz-btn': '🧠 表情测验',
+                'soundboard-btn': '🎤 语音板',
+                'back-to-submenu': '返回子模块菜单',
+                'return-submenu': '返回子模块菜单',
+                'return-module': '返回模块菜单',
+                'nav-help-flashcards': '点击卡片翻转并学习情绪！使用下面的导航按钮返回菜单。',
+                'nav-help-matching': '拖动面部表情与情绪名称匹配！匹配全部6个即可完成。',
+                'nav-help-quiz': '看脸部并选择正确的情绪！回答全部10个问题。',
+                'nav-help-soundboard': '点击每个情绪卡以听听它的声音！探索所有情绪。',
+                'Happy': '快乐',
+                'Sad': '悲伤',
+                'Angry': '生气',
+                'Surprised': '惊讶',
+                'Scared': '害怕',
+                'Excited': '兴奋',
+                'happy-description': '喜悦和满足的感觉。当好事发生时你可能会感到快乐！',
+                'sad-description': '悲伤或不快乐的感觉。当令人失望的事情发生时，人们会感到悲伤。',
+                'angry-description': '强烈的不悦感。当不公平的事情发生时，你可能会感到生气。',
+                'surprised-description': '当意想不到的事情发生时的感觉。惊讶可能是好的或坏的！',
+                'scared-description': '恐惧或担心的感觉。当人们感到危险时会感到害怕。',
+                'excited-description': '热情和活力的感觉。当你期待某事时会感到兴奋！',
+                'happy-sound': '笑声和欢快的声音',
+                'sad-sound': '轻柔的哭泣和叹息',
+                'angry-sound': '沮丧和不安的声音',
+                'surprised-sound': '惊讶的喘息',
+                'scared-sound': '紧张和害怕的声音',
+                'excited-sound': '充满活力和热情的声音'
+            }
+        };
+
+        // Function to change language
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active button
+            document.querySelectorAll('.language-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update all translatable elements
+            updateTranslations();
+        }
+
+        // Function to update all translations
+        function updateTranslations() {
+            const lang = translations[currentLanguage];
+            
+            // Update main UI elements
+            document.getElementById('game-title').childNodes[0].textContent = lang['game-title'];
+            document.getElementById('welcome-message').childNodes[0].textContent = lang['welcome-message'];
+            document.getElementById('flashcard-btn').textContent = lang['flashcard-btn'];
+            document.getElementById('matching-btn').textContent = lang['matching-btn'];
+            document.getElementById('quiz-btn').textContent = lang['quiz-btn'];
+            document.getElementById('soundboard-btn').textContent = lang['soundboard-btn'];
+            
+            // Update navigation help texts
+            if (document.getElementById('nav-help-flashcards')) {
+                document.getElementById('nav-help-flashcards').childNodes[0].textContent = lang['nav-help-flashcards'];
+            }
+            if (document.getElementById('nav-help-matching')) {
+                document.getElementById('nav-help-matching').childNodes[0].textContent = lang['nav-help-matching'];
+            }
+            if (document.getElementById('nav-help-quiz')) {
+                document.getElementById('nav-help-quiz').childNodes[0].textContent = lang['nav-help-quiz'];
+            }
+            if (document.getElementById('nav-help-soundboard')) {
+                document.getElementById('nav-help-soundboard').childNodes[0].textContent = lang['nav-help-soundboard'];
+            }
+            
+            // Update all data-translate elements
+            document.querySelectorAll('[data-translate]').forEach(elem => {
+                const key = elem.getAttribute('data-translate');
+                if (lang[key]) {
+                    elem.textContent = lang[key];
+                }
+            });
+            
+            // Update emotion names and descriptions
+            updateEmotionTranslations();
+        }
+
+        // Function to update emotion translations in the data
+        function updateEmotionTranslations() {
+            const lang = translations[currentLanguage];
+            
+            // Update emotion names
+            emotions.forEach(emotion => {
+                const baseKey = emotion.name;
+                emotion.translatedName = lang[baseKey] || emotion.name;
+                emotion.translatedDescription = lang[baseKey.toLowerCase() + '-description'] || emotion.description;
+                emotion.translatedSoundDescription = lang[baseKey.toLowerCase() + '-sound'] || emotion.soundDescription;
+            });
+            
+            // Refresh current screen if needed
+            const activeScreen = document.querySelector('.game-screen.active');
+            if (activeScreen) {
+                if (activeScreen.id === 'flashcards-screen') {
+                    updateFlashcard();
+                } else if (activeScreen.id === 'soundboard-screen') {
+                    initSoundboard();
+                }
+            }
+        }
+
+        // Text-to-Speech function
+        function speakText(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Get text content without the button
+            let text = element.childNodes[0] ? element.childNodes[0].textContent : element.textContent;
+            text = text.trim();
+            
+            // Stop any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Set language based on current selection
+            if (currentLanguage === 'ms') {
+                utterance.lang = 'ms-MY'; // Malay
+            } else if (currentLanguage === 'zh') {
+                utterance.lang = 'zh-CN'; // Chinese
+            } else {
+                utterance.lang = 'en-US'; // English
+            }
+            
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Visual feedback
+            const voiceButtons = element.querySelectorAll('.voice-button');
+            voiceButtons.forEach(btn => {
+                btn.classList.add('playing');
+            });
+            
+            utterance.onend = () => {
+                voiceButtons.forEach(btn => {
+                    btn.classList.remove('playing');
+                });
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Function to speak custom text
+        function speakCustomText(text) {
+            if (!text) return;
+            
+            // Stop any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Set language based on current selection
+            if (currentLanguage === 'ms') {
+                utterance.lang = 'ms-MY';
+            } else if (currentLanguage === 'zh') {
+                utterance.lang = 'zh-CN';
+            } else {
+                utterance.lang = 'en-US';
+            }
+            
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Function to return to module menu (placeholder - could navigate to parent page)
+        function returnToModuleMenu() {
+            // This would typically navigate to a parent module menu page
+            // For now, we'll show an alert
+            const messages = {
+                en: 'Returning to Module Menu...',
+                ms: 'Kembali ke Menu Modul...',
+                zh: '返回模块菜单...'
+            };
+            alert(messages[currentLanguage]);
+            // In a real implementation, this might be:
+            // window.location.href = '../module-menu.html';
+        }
+
         // Human-style emotion data with realistic SVG faces
         const emotions = [
             {
                 name: "Happy",
+                translatedName: "Happy",
                 description: "A feeling of joy and contentment. You might feel happy when something good happens!",
+                translatedDescription: "A feeling of joy and contentment. You might feel happy when something good happens!",
                 soundDescription: "Laughing and cheerful voice",
+                translatedSoundDescription: "Laughing and cheerful voice",
                 color: "#FFD93D"
             },
             {
                 name: "Sad",
+                translatedName: "Sad",
                 description: "A feeling of sorrow or unhappiness. People feel sad when something disappointing happens.",
+                translatedDescription: "A feeling of sorrow or unhappiness. People feel sad when something disappointing happens.",
                 soundDescription: "Soft crying and sighing",
+                translatedSoundDescription: "Soft crying and sighing",
                 color: "#6C9BCF"
             },
             {
                 name: "Angry",
+                translatedName: "Angry",
                 description: "A strong feeling of displeasure. You might feel angry when something unfair happens.",
+                translatedDescription: "A strong feeling of displeasure. You might feel angry when something unfair happens.",
                 soundDescription: "Frustrated and upset voice",
+                translatedSoundDescription: "Frustrated and upset voice",
                 color: "#FF6B6B"
             },
             {
                 name: "Surprised",
+                translatedName: "Surprised",
                 description: "A feeling when something unexpected happens. Surprise can be good or bad!",
+                translatedDescription: "A feeling when something unexpected happens. Surprise can be good or bad!",
                 soundDescription: "Gasping with amazement",
+                translatedSoundDescription: "Gasping with amazement",
                 color: "#A8E6CF"
             },
             {
                 name: "Scared",
+                translatedName: "Scared",
                 description: "A feeling of fear or worry. People feel scared when they sense danger.",
+                translatedDescription: "A feeling of fear or worry. People feel scared when they sense danger.",
                 soundDescription: "Nervous and frightened voice",
+                translatedSoundDescription: "Nervous and frightened voice",
                 color: "#B4A7D6"
             },
             {
                 name: "Excited",
+                translatedName: "Excited",
                 description: "A feeling of enthusiasm and energy. You feel excited when looking forward to something!",
+                translatedDescription: "A feeling of enthusiasm and energy. You feel excited when looking forward to something!",
                 soundDescription: "Energetic and enthusiastic voice",
+                translatedSoundDescription: "Energetic and enthusiastic voice",
                 color: "#FFB6C1"
             }
         ];
@@ -1069,7 +1497,7 @@
             const emotion = emotions[currentCardIndex];
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
-            document.getElementById('card-emotion-name').textContent = emotion.name;
+            document.getElementById('card-emotion-name').textContent = emotion.translatedName;
             
             document.getElementById('flashcard').classList.remove('flipped');
             isCardFlipped = false;
@@ -1138,12 +1566,12 @@
             const namesGrid = document.getElementById('names-grid');
             namesGrid.innerHTML = '';
             
-            const shuffledNames = shuffleArray(emotions.map(e => e.name));
-            shuffledNames.forEach(name => {
+            const shuffledNames = shuffleArray(emotions.map(e => ({ name: e.name, translatedName: e.translatedName })));
+            shuffledNames.forEach(emotionData => {
                 const dropZone = document.createElement('div');
                 dropZone.className = 'drop-zone';
-                dropZone.textContent = name;
-                dropZone.dataset.emotion = name;
+                dropZone.textContent = emotionData.translatedName;
+                dropZone.dataset.emotion = emotionData.name;
                 
                 dropZone.addEventListener('dragover', handleDragOver);
                 dropZone.addEventListener('drop', handleDrop);
@@ -1174,7 +1602,11 @@
             faceSvg.style.marginRight = '10px';
             dropZone.innerHTML = '';
             dropZone.appendChild(faceSvg);
-            dropZone.appendChild(document.createTextNode(targetEmotion));
+            
+            // Find the translated name for the emotion
+            const emotion = emotions.find(e => e.name === targetEmotion);
+            const displayText = emotion ? emotion.translatedName : targetEmotion;
+            dropZone.appendChild(document.createTextNode(displayText));
             draggedElement.style.display = 'none';
             
             matchingScore += 10;
@@ -1183,7 +1615,12 @@
             
             if (matchesFound === 6) {
                 setTimeout(() => {
-                    showCompletionMessage('Amazing! You matched all emotions! 🌟');
+                    const messages = {
+                        en: 'Amazing! You matched all emotions! 🌟',
+                        ms: 'Hebat! Anda telah memasangkan semua emosi! 🌟',
+                        zh: '太棒了！你匹配了所有情绪！🌟'
+                    };
+                    showCompletionMessage(messages[currentLanguage]);
                 }, 500);
             }
             
@@ -1358,16 +1795,28 @@
             document.getElementById('question-number').textContent = currentQuestionIndex + 1;
             document.getElementById('quiz-score').textContent = quizScore;
             
-            // Update the quiz prompt to show only the emotion word
-            document.querySelector('.quiz-prompt').textContent = question.emotion;
+            // Find the emotion to get translated name
+            const emotion = emotions.find(e => e.name === question.emotion);
+            const translatedEmotionName = emotion ? emotion.translatedName : question.emotion;
+            
+            // Update the quiz prompt to show the translated emotion word
+            document.querySelector('.quiz-prompt').textContent = translatedEmotionName;
             
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
             
+            // Translate options
+            const yesNoTranslations = {
+                en: { Yes: 'Yes', No: 'No' },
+                ms: { Yes: 'Ya', No: 'Tidak' },
+                zh: { Yes: '是', No: '否' }
+            };
+            
             question.options.forEach(option => {
                 const button = document.createElement('button');
                 button.className = 'quiz-option';
-                button.textContent = option;
+                button.textContent = yesNoTranslations[currentLanguage][option];
+                button.dataset.value = option;
                 button.onclick = () => selectAnswer(option, question.correct);
                 optionsContainer.appendChild(button);
             });
@@ -1385,22 +1834,44 @@
             const options = document.querySelectorAll('.quiz-option');
             const feedback = document.getElementById('quiz-feedback');
             
+            // Translate Yes/No for display
+            const yesNoTranslations = {
+                en: { Yes: 'Yes', No: 'No' },
+                ms: { Yes: 'Ya', No: 'Tidak' },
+                zh: { Yes: '是', No: '否' }
+            };
+            
             options.forEach(option => {
-                if (option.textContent === correct) {
+                const optionValue = option.dataset.value;
+                if (optionValue === correct) {
                     option.classList.add('correct');
-                } else if (option.textContent === selected && selected !== correct) {
+                } else if (optionValue === selected && selected !== correct) {
                     option.classList.add('incorrect');
                 }
                 option.onclick = null;
             });
             
+            const feedbackMessages = {
+                correct: {
+                    en: 'Correct! Great job recognizing that emotion! 🌟',
+                    ms: 'Betul! Syabas kerana mengenali emosi itu! 🌟',
+                    zh: '正确！很好地识别了那种情绪！🌟'
+                },
+                incorrect: {
+                    en: 'Not quite! The correct answer is {answer}. Keep learning! 💪',
+                    ms: 'Tidak tepat! Jawapan yang betul ialah {answer}. Terus belajar! 💪',
+                    zh: '不太对！正确答案是{answer}。继续学习！💪'
+                }
+            };
+            
             if (selected === correct) {
                 quizScore += 10;
-                feedback.textContent = 'Correct! Great job recognizing that emotion! 🌟';
+                feedback.textContent = feedbackMessages.correct[currentLanguage];
                 feedback.className = 'quiz-feedback correct';
                 playSuccessSound();
             } else {
-                feedback.textContent = `Not quite! The correct answer is ${correct}. Keep learning! 💪`;
+                const translatedAnswer = yesNoTranslations[currentLanguage][correct];
+                feedback.textContent = feedbackMessages.incorrect[currentLanguage].replace('{answer}', translatedAnswer);
                 feedback.className = 'quiz-feedback incorrect';
             }
             
@@ -1418,22 +1889,54 @@
                 const feedback = document.getElementById('quiz-feedback');
                 const percentage = (quizScore / 100) * 100;
                 
+                const completionMessages = {
+                    en: {
+                        title: 'Quiz Completed! 🎉',
+                        score: 'Final Score: {score}/100 ({percentage}%)',
+                        excellent: "🌟 You're an emotion recognition expert!",
+                        good: '👍 Great job learning emotions!',
+                        practice: '💪 Keep practicing to improve!'
+                    },
+                    ms: {
+                        title: 'Kuiz Selesai! 🎉',
+                        score: 'Skor Akhir: {score}/100 ({percentage}%)',
+                        excellent: '🌟 Anda pakar mengenali emosi!',
+                        good: '👍 Bagus! Terus belajar emosi!',
+                        practice: '💪 Terus berlatih untuk meningkatkan!'
+                    },
+                    zh: {
+                        title: '测验完成！🎉',
+                        score: '最终得分：{score}/100 ({percentage}%)',
+                        excellent: '🌟 你是情绪识别专家！',
+                        good: '👍 学习情绪做得很好！',
+                        practice: '💪 继续练习以提高！'
+                    }
+                };
+                
+                const msgs = completionMessages[currentLanguage];
+                
                 feedback.innerHTML = `
-                    <div style="font-size: 1.8rem; margin-bottom: 15px;">Quiz Completed! 🎉</div>
-                    <div style="font-size: 1.4rem;">Final Score: ${quizScore}/100 (${percentage}%)</div>
+                    <div style="font-size: 1.8rem; margin-bottom: 15px;">${msgs.title}</div>
+                    <div style="font-size: 1.4rem;">${msgs.score.replace('{score}', quizScore).replace('{percentage}', percentage)}</div>
                 `;
                 
                 if (percentage >= 80) {
-                    feedback.innerHTML += '<div style="margin-top: 10px;">🌟 You\'re an emotion recognition expert!</div>';
+                    feedback.innerHTML += `<div style="margin-top: 10px;">${msgs.excellent}</div>`;
                 } else if (percentage >= 60) {
-                    feedback.innerHTML += '<div style="margin-top: 10px;">👍 Great job learning emotions!</div>';
+                    feedback.innerHTML += `<div style="margin-top: 10px;">${msgs.good}</div>`;
                 } else {
-                    feedback.innerHTML += '<div style="margin-top: 10px;">💪 Keep practicing to improve!</div>';
+                    feedback.innerHTML += `<div style="margin-top: 10px;">${msgs.practice}</div>`;
                 }
                 
                 feedback.className = 'quiz-feedback correct';
                 
-                document.getElementById('next-question').textContent = 'Play Again';
+                const playAgainText = {
+                    en: 'Play Again',
+                    ms: 'Main Semula',
+                    zh: '再玩一次'
+                };
+                
+                document.getElementById('next-question').textContent = playAgainText[currentLanguage];
                 document.getElementById('next-question').onclick = initQuiz;
                 document.getElementById('next-question').disabled = false;
             } else {
@@ -1458,15 +1961,20 @@
                 
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'sound-name';
-                nameDiv.textContent = emotion.name;
+                nameDiv.textContent = emotion.translatedName;
                 
                 const descDiv = document.createElement('div');
                 descDiv.className = 'sound-description';
-                descDiv.textContent = emotion.soundDescription;
+                descDiv.textContent = emotion.translatedSoundDescription;
                 
                 const playBtn = document.createElement('button');
                 playBtn.className = 'play-button';
-                playBtn.textContent = '🔊 Play Voice';
+                const playText = {
+                    en: '🔊 Play Voice',
+                    ms: '🔊 Main Suara',
+                    zh: '🔊 播放声音'
+                };
+                playBtn.textContent = playText[currentLanguage];
                 playBtn.onclick = () => playEmotionSound(index);
                 
                 card.appendChild(faceSvg);
@@ -1485,24 +1993,36 @@
             const card = document.querySelectorAll('.sound-card')[emotionIndex];
             const playButton = card.querySelector('.play-button');
             
+            const playingText = {
+                en: '🎵 Playing...',
+                ms: '🎵 Bermain...',
+                zh: '🎵 播放中...'
+            };
+            
+            const playText = {
+                en: '🔊 Play Voice',
+                ms: '🔊 Main Suara',
+                zh: '🔊 播放声音'
+            };
+            
             // Reset the previously playing card's UI if there is one
             if (currentPlayingIndex !== null && currentPlayingIndex !== emotionIndex) {
                 const prevCard = document.querySelectorAll('.sound-card')[currentPlayingIndex];
                 const prevButton = prevCard.querySelector('.play-button');
                 prevCard.classList.remove('playing');
-                prevButton.textContent = '🔊 Play Voice';
+                prevButton.textContent = playText[currentLanguage];
                 prevButton.classList.remove('playing');
             }
             
             currentPlayingIndex = emotionIndex;
             card.classList.add('playing');
-            playButton.textContent = '🎵 Playing...';
+            playButton.textContent = playingText[currentLanguage];
             playButton.classList.add('playing');
             
             // Play MP3 sound file based on emotion
             playHumanVoice(emotion.name, () => {
                 card.classList.remove('playing');
-                playButton.textContent = '🔊 Play Voice';
+                playButton.textContent = playText[currentLanguage];
                 playButton.classList.remove('playing');
                 if (currentPlayingIndex === emotionIndex) {
                     currentPlayingIndex = null;
@@ -1584,6 +2104,9 @@
 
         // Initialize the game
         updateFlashcard();
+        
+        // Initialize translations
+        updateTranslations();
         
         // Handle audio context for mobile devices
         document.addEventListener('click', () => {
