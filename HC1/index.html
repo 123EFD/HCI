@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Emotion Learning Game</title>
   <script src="/_sdk/element_sdk.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
   <style>
         body {
             box-sizing: border-box;
@@ -698,6 +700,204 @@
                 width: 100%;
             }
         }
+
+        /* Facial Recognition Styles */
+        .facial-recognition-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .webcam-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        #webcam-container canvas {
+            border-radius: 20px;
+            max-width: 100%;
+        }
+
+        .prediction-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .prediction-title {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .prediction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .prediction-item.top-prediction {
+            border-color: #43e97b;
+            background: rgba(67, 233, 123, 0.15);
+        }
+
+        .prediction-emotion {
+            font-weight: bold;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prediction-bar-container {
+            flex: 1;
+            margin: 0 15px;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .prediction-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .prediction-bar.top-prediction {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+        }
+
+        .prediction-percentage {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .webcam-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .webcam-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .webcam-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .webcam-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .webcam-btn.stop {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .webcam-status {
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .webcam-status.error {
+            background: rgba(245, 87, 108, 0.1);
+            color: #f5576c;
+        }
+
+        .webcam-status.success {
+            background: rgba(67, 233, 123, 0.1);
+            color: #43e97b;
+        }
+
+        .detected-emotion-display {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .detected-emotion-label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .detected-emotion-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .model-note {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(113, 128, 150, 0.1);
+            border-radius: 10px;
+        }
+
+        .model-note a {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .prediction-container {
+                padding: 15px;
+            }
+            
+            .prediction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .prediction-bar-container {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .prediction-percentage {
+                width: 100%;
+                text-align: left;
+            }
+        }
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -717,7 +917,7 @@
      <h1 class="title" id="game-title">Emotion Learning Game<button class="voice-button" onclick="speakText('game-title')" title="Listen">🔊</button></h1>
      <p class="subtitle" id="welcome-message">Learn to recognize and name emotions!<button class="voice-button" onclick="speakText('welcome-message')" title="Listen">🔊</button></p>
     </div>
-    <div class="game-menu"><button class="menu-button" onclick="showFlashcards()" id="flashcard-btn"> 🎴 Flashcards </button> <button class="menu-button secondary" onclick="showMatchingGame()" id="matching-btn"> 🎯 Matching Game </button> <button class="menu-button tertiary" onclick="showQuiz()" id="quiz-btn"> 🧠 Expression Quiz </button> <button class="menu-button quaternary" onclick="showSoundboard()" id="soundboard-btn"> 🎤 Voice Soundboard </button>
+    <div class="game-menu"><button class="menu-button" onclick="showFlashcards()" id="flashcard-btn"> 🎴 Flashcards </button> <button class="menu-button secondary" onclick="showMatchingGame()" id="matching-btn"> 🎯 Matching Game </button> <button class="menu-button tertiary" onclick="showQuiz()" id="quiz-btn"> 🧠 Expression Quiz </button> <button class="menu-button quaternary" onclick="showSoundboard()" id="soundboard-btn"> 🎤 Voice Soundboard </button> <button class="menu-button" style="background: linear-gradient(135deg, #f093fb, #764ba2);" onclick="showFacialRecognition()" id="facial-btn"> 📷 Facial Recognition </button>
     </div>
    </div><!-- Flashcards Screen -->
    <div id="flashcards-screen" class="game-screen">
@@ -813,6 +1013,40 @@
     <div class="navigation-buttons">
      <button class="menu-return-button" onclick="showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
     </div>
+   </div><!-- Facial Recognition Screen -->
+   <div id="facial-screen" class="game-screen">
+    <div class="navigation-help" id="nav-help-facial">
+     Use your webcam to detect emotions! Make different facial expressions and see the prediction.
+     <button class="voice-button" onclick="speakText('nav-help-facial')" title="Listen">🔊</button>
+    </div>
+    <button class="back-button" onclick="stopFacialRecognition(); showMainMenu()">← <span data-translate="back-to-submenu">Back to Sub-module Menu</span></button>
+    <div class="facial-recognition-container">
+     <div class="webcam-status" id="webcam-status">Click "Start Camera" to begin emotion detection</div>
+     <div class="webcam-controls">
+      <button class="webcam-btn" id="start-webcam-btn" onclick="initFacialRecognition()">📷 Start Camera</button>
+      <button class="webcam-btn stop" id="stop-webcam-btn" onclick="stopFacialRecognition()" style="display: none;">⏹ Stop Camera</button>
+     </div>
+     <div class="webcam-wrapper">
+      <div id="webcam-container"></div>
+     </div>
+     <div class="detected-emotion-display" id="detected-emotion-display" style="display: none;">
+      <div class="detected-emotion-label" id="detected-label">Detected Emotion:</div>
+      <div class="detected-emotion-name" id="detected-emotion">-</div>
+     </div>
+     <div class="prediction-container" id="prediction-container" style="display: none;">
+      <div class="prediction-title" id="prediction-title">Emotion Predictions</div>
+      <div id="label-container"></div>
+     </div>
+     <div class="model-note" id="model-note">
+      <strong>Note:</strong> This feature uses a Teachable Machine model to detect emotions. 
+      For best results, ensure good lighting and face the camera directly.
+      <br><br>
+      <a href="https://teachablemachine.withgoogle.com/train/image" target="_blank">Create your own emotion model with Teachable Machine →</a>
+     </div>
+    </div>
+    <div class="navigation-buttons">
+     <button class="menu-return-button" onclick="stopFacialRecognition(); showMainMenu()"><span data-translate="return-submenu">Return to Sub-module Menu</span></button>
+    </div>
    </div>
   </div>
   <script>
@@ -828,6 +1062,7 @@
                 'matching-btn': '🎯 Matching Game',
                 'quiz-btn': '🧠 Expression Quiz',
                 'soundboard-btn': '🎤 Voice Soundboard',
+                'facial-btn': '📷 Facial Recognition',
                 'back-to-submenu': 'Back to Sub-module Menu',
                 'return-submenu': 'Return to Sub-module Menu',
                 'return-module': 'Return to Module Menu',
@@ -835,6 +1070,7 @@
                 'nav-help-matching': 'Drag facial expressions to match emotion names! Match all 6 to complete.',
                 'nav-help-quiz': 'Look at the face and choose the correct emotion! Answer all 10 questions.',
                 'nav-help-soundboard': 'Click on each emotion card to hear how it sounds! Explore all emotions.',
+                'nav-help-facial': 'Use your webcam to detect emotions! Make different facial expressions and see the prediction.',
                 'previous': '← Previous',
                 'next': 'Next →',
                 'Happy': 'Happy',
@@ -856,7 +1092,17 @@
                 'scared-sound': 'Nervous and frightened voice',
                 'excited-sound': 'Energetic and enthusiastic voice',
                 'new-game': '🔄 New Game',
-                'next-question': 'Next Question'
+                'next-question': 'Next Question',
+                'start-camera': '📷 Start Camera',
+                'stop-camera': '⏹ Stop Camera',
+                'webcam-status-ready': 'Click "Start Camera" to begin emotion detection',
+                'webcam-status-loading': 'Loading model and starting webcam...',
+                'webcam-status-running': 'Webcam is running - detecting emotions!',
+                'webcam-status-error': 'Error: Could not access webcam. Please allow camera access.',
+                'detected-emotion-label': 'Detected Emotion:',
+                'prediction-title': 'Emotion Predictions',
+                'model-note': 'Note: This feature uses a Teachable Machine model to detect emotions. For best results, ensure good lighting and face the camera directly.',
+                'model-link': 'Create your own emotion model with Teachable Machine →'
             },
             ms: {
                 'game-title': 'Permainan Pembelajaran Emosi',
@@ -865,6 +1111,7 @@
                 'matching-btn': '🎯 Permainan Padanan',
                 'quiz-btn': '🧠 Kuiz Ekspresi',
                 'soundboard-btn': '🎤 Papan Suara',
+                'facial-btn': '📷 Pengecaman Wajah',
                 'back-to-submenu': 'Kembali ke Menu Sub-modul',
                 'return-submenu': 'Kembali ke Menu Sub-modul',
                 'return-module': 'Kembali ke Menu Modul',
@@ -872,6 +1119,7 @@
                 'nav-help-matching': 'Seret ekspresi muka untuk dipadankan dengan nama emosi! Padankan semua 6 untuk selesai.',
                 'nav-help-quiz': 'Lihat wajah dan pilih emosi yang betul! Jawab semua 10 soalan.',
                 'nav-help-soundboard': 'Klik pada setiap kad emosi untuk mendengar bunyinya! Terokai semua emosi.',
+                'nav-help-facial': 'Gunakan kamera web anda untuk mengesan emosi! Buat ekspresi muka yang berbeza dan lihat ramalan.',
                 'previous': '← Sebelumnya',
                 'next': 'Seterusnya →',
                 'Happy': 'Gembira',
@@ -893,7 +1141,17 @@
                 'scared-sound': 'Suara gugup dan takut',
                 'excited-sound': 'Suara bertenaga dan bersemangat',
                 'new-game': '🔄 Permainan Baru',
-                'next-question': 'Soalan Seterusnya'
+                'next-question': 'Soalan Seterusnya',
+                'start-camera': '📷 Mulakan Kamera',
+                'stop-camera': '⏹ Hentikan Kamera',
+                'webcam-status-ready': 'Klik "Mulakan Kamera" untuk mula mengesan emosi',
+                'webcam-status-loading': 'Memuatkan model dan memulakan kamera web...',
+                'webcam-status-running': 'Kamera web sedang berjalan - mengesan emosi!',
+                'webcam-status-error': 'Ralat: Tidak dapat mengakses kamera web. Sila benarkan akses kamera.',
+                'detected-emotion-label': 'Emosi Dikesan:',
+                'prediction-title': 'Ramalan Emosi',
+                'model-note': 'Nota: Ciri ini menggunakan model Teachable Machine untuk mengesan emosi. Untuk hasil terbaik, pastikan pencahayaan yang baik dan hadap kamera secara langsung.',
+                'model-link': 'Cipta model emosi anda sendiri dengan Teachable Machine →'
             },
             zh: {
                 'game-title': '情绪学习游戏',
@@ -902,6 +1160,7 @@
                 'matching-btn': '🎯 配对游戏',
                 'quiz-btn': '🧠 表情测验',
                 'soundboard-btn': '🎤 语音板',
+                'facial-btn': '📷 面部识别',
                 'back-to-submenu': '返回子模块菜单',
                 'return-submenu': '返回子模块菜单',
                 'return-module': '返回模块菜单',
@@ -909,6 +1168,7 @@
                 'nav-help-matching': '拖动面部表情与情绪名称匹配！匹配全部6个即可完成。',
                 'nav-help-quiz': '看脸部并选择正确的情绪！回答全部10个问题。',
                 'nav-help-soundboard': '点击每个情绪卡以听听它的声音！探索所有情绪。',
+                'nav-help-facial': '使用你的摄像头检测情绪！做出不同的面部表情，看看预测结果。',
                 'previous': '← 上一个',
                 'next': '下一个 →',
                 'Happy': '快乐',
@@ -930,7 +1190,17 @@
                 'scared-sound': '紧张和害怕的声音',
                 'excited-sound': '充满活力和热情的声音',
                 'new-game': '🔄 新游戏',
-                'next-question': '下一个问题'
+                'next-question': '下一个问题',
+                'start-camera': '📷 启动摄像头',
+                'stop-camera': '⏹ 停止摄像头',
+                'webcam-status-ready': '点击"启动摄像头"开始检测情绪',
+                'webcam-status-loading': '正在加载模型和启动摄像头...',
+                'webcam-status-running': '摄像头正在运行 - 检测情绪中！',
+                'webcam-status-error': '错误：无法访问摄像头。请允许摄像头访问。',
+                'detected-emotion-label': '检测到的情绪：',
+                'prediction-title': '情绪预测',
+                'model-note': '注意：此功能使用Teachable Machine模型来检测情绪。为获得最佳效果，请确保良好的照明并直接面对摄像头。',
+                'model-link': '使用Teachable Machine创建你自己的情绪模型 →'
             }
         };
         
@@ -985,6 +1255,7 @@
             document.getElementById('matching-btn').textContent = lang['matching-btn'];
             document.getElementById('quiz-btn').textContent = lang['quiz-btn'];
             document.getElementById('soundboard-btn').textContent = lang['soundboard-btn'];
+            document.getElementById('facial-btn').textContent = lang['facial-btn'];
             
             // Update navigation help texts
             const updateNavHelp = (id, key) => {
@@ -998,6 +1269,7 @@
             updateNavHelp('nav-help-matching', 'nav-help-matching');
             updateNavHelp('nav-help-quiz', 'nav-help-quiz');
             updateNavHelp('nav-help-soundboard', 'nav-help-soundboard');
+            updateNavHelp('nav-help-facial', 'nav-help-facial');
             
             // Update New Game button in Matching Game
             const newGameBtn = document.getElementById('new-game-btn');
@@ -1650,6 +1922,12 @@
             initSoundboard();
         }
 
+        function showFacialRecognition() {
+            hideAllScreens();
+            document.getElementById('facial-screen').classList.add('active');
+            updateFacialRecognitionUI();
+        }
+
         function hideAllScreens() {
             document.querySelectorAll('.game-screen').forEach(screen => {
                 screen.classList.remove('active');
@@ -2250,6 +2528,324 @@
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
             return shuffled;
+        }
+
+        // Facial Recognition Variables
+        let facialModel, facialWebcam, facialMaxPredictions;
+        let isFacialRecognitionRunning = false;
+        let facialAnimationId = null;
+        let isDemoMode = false;
+        let lastPredictionTime = 0;
+
+        // Configuration constants
+        const FACIAL_MODEL_URL = "./emotion_model/";
+        const WEBCAM_WIDTH = 300;
+        const WEBCAM_HEIGHT = 300;
+        const PREDICTION_FPS = 15; // Limit predictions to 15 FPS to save CPU
+        const PREDICTION_INTERVAL = 1000 / PREDICTION_FPS;
+
+        // Demo mode state for more realistic predictions
+        let demoPredictions = null;
+        let demoTransitionTarget = null;
+        let demoTransitionProgress = 0;
+
+        // Update facial recognition UI text based on current language
+        function updateFacialRecognitionUI() {
+            const lang = translations[currentLanguage];
+            
+            const startBtn = document.getElementById('start-webcam-btn');
+            const stopBtn = document.getElementById('stop-webcam-btn');
+            const status = document.getElementById('webcam-status');
+            const detectedLabel = document.getElementById('detected-label');
+            const predictionTitle = document.getElementById('prediction-title');
+            
+            if (startBtn && !isFacialRecognitionRunning) {
+                startBtn.textContent = lang['start-camera'];
+            }
+            if (stopBtn) {
+                stopBtn.textContent = lang['stop-camera'];
+            }
+            if (status && !isFacialRecognitionRunning) {
+                status.textContent = lang['webcam-status-ready'];
+            }
+            if (detectedLabel) {
+                detectedLabel.textContent = lang['detected-emotion-label'];
+            }
+            if (predictionTitle) {
+                predictionTitle.textContent = lang['prediction-title'];
+            }
+        }
+
+        // Initialize facial recognition with Teachable Machine
+        async function initFacialRecognition() {
+            const lang = translations[currentLanguage];
+            const statusEl = document.getElementById('webcam-status');
+            const startBtn = document.getElementById('start-webcam-btn');
+            const stopBtn = document.getElementById('stop-webcam-btn');
+            
+            try {
+                // Update status
+                statusEl.textContent = lang['webcam-status-loading'];
+                statusEl.className = 'webcam-status';
+                startBtn.disabled = true;
+                isDemoMode = false;
+                
+                // Load the model and metadata
+                const modelURL = FACIAL_MODEL_URL + "model.json";
+                const metadataURL = FACIAL_MODEL_URL + "metadata.json";
+                
+                try {
+                    facialModel = await tmImage.load(modelURL, metadataURL);
+                    facialMaxPredictions = facialModel.getTotalClasses();
+                } catch (modelError) {
+                    console.warn('Could not load custom model, using demo mode:', modelError);
+                    // Demo mode - simulate emotion detection without a real model
+                    facialMaxPredictions = 6;
+                    facialModel = null;
+                    isDemoMode = true;
+                    // Initialize demo predictions with balanced values
+                    initDemoPredictions();
+                }
+                
+                // Setup webcam
+                const flip = true;
+                facialWebcam = new tmImage.Webcam(WEBCAM_WIDTH, WEBCAM_HEIGHT, flip);
+                await facialWebcam.setup();
+                await facialWebcam.play();
+                
+                isFacialRecognitionRunning = true;
+                lastPredictionTime = 0;
+                
+                // Append webcam to the DOM
+                const webcamContainer = document.getElementById('webcam-container');
+                webcamContainer.innerHTML = '';
+                webcamContainer.appendChild(facialWebcam.canvas);
+                
+                // Show prediction containers
+                document.getElementById('detected-emotion-display').style.display = 'block';
+                document.getElementById('prediction-container').style.display = 'block';
+                
+                // Initialize label container
+                initializePredictionLabels();
+                
+                // Update UI with demo mode indicator if applicable
+                if (isDemoMode) {
+                    const demoMessages = {
+                        en: 'Demo Mode - No model loaded. Add your Teachable Machine model for real detection.',
+                        ms: 'Mod Demo - Tiada model dimuatkan. Tambah model Teachable Machine anda untuk pengesanan sebenar.',
+                        zh: '演示模式 - 未加载模型。添加您的Teachable Machine模型以进行真实检测。'
+                    };
+                    statusEl.textContent = demoMessages[currentLanguage];
+                    statusEl.className = 'webcam-status';
+                } else {
+                    statusEl.textContent = lang['webcam-status-running'];
+                    statusEl.className = 'webcam-status success';
+                }
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                
+                // Start prediction loop
+                facialLoop();
+                
+            } catch (error) {
+                console.error('Error initializing facial recognition:', error);
+                statusEl.textContent = lang['webcam-status-error'];
+                statusEl.className = 'webcam-status error';
+                startBtn.disabled = false;
+            }
+        }
+
+        // Initialize prediction label display
+        function initializePredictionLabels() {
+            const labelContainer = document.getElementById('label-container');
+            labelContainer.innerHTML = '';
+            
+            // Use the 6 emotions from the game
+            const emotionLabels = facialModel ? 
+                Array.from({length: facialMaxPredictions}, (_, i) => emotions[i % emotions.length].name) :
+                emotions.map(e => e.name);
+            
+            emotionLabels.forEach((emotionName, i) => {
+                const emotion = emotions.find(e => e.name === emotionName) || emotions[i % emotions.length];
+                const item = document.createElement('div');
+                item.className = 'prediction-item';
+                item.id = `prediction-${i}`;
+                item.innerHTML = `
+                    <div class="prediction-emotion">
+                        <span>${emotion.translatedName}</span>
+                    </div>
+                    <div class="prediction-bar-container">
+                        <div class="prediction-bar" id="bar-${i}" style="width: 0%"></div>
+                    </div>
+                    <div class="prediction-percentage" id="percent-${i}">0%</div>
+                `;
+                labelContainer.appendChild(item);
+            });
+        }
+
+        // Initialize demo predictions with balanced starting values
+        function initDemoPredictions() {
+            demoPredictions = emotions.map((emotion, i) => ({
+                className: emotion.name,
+                probability: 1 / emotions.length
+            }));
+            demoTransitionTarget = null;
+            demoTransitionProgress = 0;
+        }
+
+        // Generate more realistic demo predictions with smooth transitions
+        function generateDemoPredictions() {
+            // Occasionally change the dominant emotion for demo
+            if (!demoTransitionTarget || demoTransitionProgress >= 1) {
+                // Pick a new random dominant emotion
+                const dominantIndex = Math.floor(Math.random() * emotions.length);
+                demoTransitionTarget = emotions.map((emotion, i) => {
+                    if (i === dominantIndex) {
+                        return 0.5 + Math.random() * 0.3; // 50-80% for dominant
+                    } else {
+                        return 0.05 + Math.random() * 0.1; // 5-15% for others
+                    }
+                });
+                // Normalize target
+                const total = demoTransitionTarget.reduce((sum, p) => sum + p, 0);
+                demoTransitionTarget = demoTransitionTarget.map(p => p / total);
+                demoTransitionProgress = 0;
+            }
+            
+            // Smoothly interpolate towards target
+            demoTransitionProgress += 0.05;
+            demoPredictions = emotions.map((emotion, i) => ({
+                className: emotion.name,
+                probability: demoPredictions[i].probability + 
+                    (demoTransitionTarget[i] - demoPredictions[i].probability) * 0.1
+            }));
+            
+            // Add small noise for realism
+            demoPredictions.forEach(p => {
+                p.probability += (Math.random() - 0.5) * 0.02;
+                p.probability = Math.max(0.01, Math.min(0.95, p.probability));
+            });
+            
+            // Normalize
+            const total = demoPredictions.reduce((sum, p) => sum + p.probability, 0);
+            demoPredictions.forEach(p => p.probability /= total);
+            
+            return demoPredictions;
+        }
+
+        // Prediction loop with frame rate limiting
+        async function facialLoop() {
+            if (!isFacialRecognitionRunning) return;
+            
+            facialWebcam.update();
+            
+            // Throttle predictions to save CPU
+            const now = performance.now();
+            if (now - lastPredictionTime >= PREDICTION_INTERVAL) {
+                lastPredictionTime = now;
+                await facialPredict();
+            }
+            
+            facialAnimationId = window.requestAnimationFrame(facialLoop);
+        }
+
+        // Run prediction on webcam frame
+        async function facialPredict() {
+            if (!facialWebcam) return;
+            
+            let predictions;
+            
+            if (facialModel) {
+                // Use actual model prediction
+                predictions = await facialModel.predict(facialWebcam.canvas);
+            } else {
+                // Demo mode - generate realistic simulated predictions
+                predictions = generateDemoPredictions();
+            }
+            
+            // Find the top prediction
+            let topPrediction = predictions[0];
+            predictions.forEach(p => {
+                if (p.probability > topPrediction.probability) {
+                    topPrediction = p;
+                }
+            });
+            
+            // Update detected emotion display
+            const emotion = emotions.find(e => e.name === topPrediction.className) || emotions[0];
+            const demoIndicator = isDemoMode ? ' (Demo)' : '';
+            document.getElementById('detected-emotion').textContent = 
+                `${emotion.translatedName} (${(topPrediction.probability * 100).toFixed(1)}%)${demoIndicator}`;
+            
+            // Update all prediction bars
+            predictions.forEach((prediction, i) => {
+                const percentage = (prediction.probability * 100).toFixed(1);
+                const bar = document.getElementById(`bar-${i}`);
+                const percentEl = document.getElementById(`percent-${i}`);
+                const item = document.getElementById(`prediction-${i}`);
+                
+                if (bar) bar.style.width = `${percentage}%`;
+                if (percentEl) percentEl.textContent = `${percentage}%`;
+                
+                // Highlight top prediction
+                if (item) {
+                    if (prediction === topPrediction) {
+                        item.classList.add('top-prediction');
+                        if (bar) bar.classList.add('top-prediction');
+                    } else {
+                        item.classList.remove('top-prediction');
+                        if (bar) bar.classList.remove('top-prediction');
+                    }
+                }
+            });
+        }
+
+        // Stop facial recognition
+        function stopFacialRecognition() {
+            const lang = translations[currentLanguage];
+            
+            isFacialRecognitionRunning = false;
+            isDemoMode = false;
+            demoPredictions = null;
+            demoTransitionTarget = null;
+            
+            if (facialAnimationId) {
+                window.cancelAnimationFrame(facialAnimationId);
+                facialAnimationId = null;
+            }
+            
+            if (facialWebcam) {
+                facialWebcam.stop();
+                facialWebcam = null;
+            }
+            
+            // Reset UI
+            const webcamContainer = document.getElementById('webcam-container');
+            if (webcamContainer) webcamContainer.innerHTML = '';
+            
+            const statusEl = document.getElementById('webcam-status');
+            const startBtn = document.getElementById('start-webcam-btn');
+            const stopBtn = document.getElementById('stop-webcam-btn');
+            const detectedDisplay = document.getElementById('detected-emotion-display');
+            const predictionContainer = document.getElementById('prediction-container');
+            
+            if (statusEl) {
+                statusEl.textContent = lang['webcam-status-ready'];
+                statusEl.className = 'webcam-status';
+            }
+            if (startBtn) {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = false;
+            }
+            if (stopBtn) {
+                stopBtn.style.display = 'none';
+            }
+            if (detectedDisplay) {
+                detectedDisplay.style.display = 'none';
+            }
+            if (predictionContainer) {
+                predictionContainer.style.display = 'none';
+            }
         }
 
         // Initialize the game
