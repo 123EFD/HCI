@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Emotion Learning Game</title>
   <script src="/_sdk/element_sdk.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
   <style>
         body {
             box-sizing: border-box;
@@ -2534,10 +2534,20 @@
         let facialModel, facialWebcam, facialMaxPredictions;
         let isFacialRecognitionRunning = false;
         let facialAnimationId = null;
+        let isDemoMode = false;
+        let lastPredictionTime = 0;
 
-        // Model URL - can be replaced with a custom trained model
-        // Default uses a placeholder path for emotion detection model
+        // Configuration constants
         const FACIAL_MODEL_URL = "./emotion_model/";
+        const WEBCAM_WIDTH = 300;
+        const WEBCAM_HEIGHT = 300;
+        const PREDICTION_FPS = 15; // Limit predictions to 15 FPS to save CPU
+        const PREDICTION_INTERVAL = 1000 / PREDICTION_FPS;
+
+        // Demo mode state for more realistic predictions
+        let demoPredictions = null;
+        let demoTransitionTarget = null;
+        let demoTransitionProgress = 0;
 
         // Update facial recognition UI text based on current language
         function updateFacialRecognitionUI() {
@@ -2578,6 +2588,7 @@
                 statusEl.textContent = lang['webcam-status-loading'];
                 statusEl.className = 'webcam-status';
                 startBtn.disabled = true;
+                isDemoMode = false;
                 
                 // Load the model and metadata
                 const modelURL = FACIAL_MODEL_URL + "model.json";
@@ -2591,15 +2602,19 @@
                     // Demo mode - simulate emotion detection without a real model
                     facialMaxPredictions = 6;
                     facialModel = null;
+                    isDemoMode = true;
+                    // Initialize demo predictions with balanced values
+                    initDemoPredictions();
                 }
                 
                 // Setup webcam
                 const flip = true;
-                facialWebcam = new tmImage.Webcam(300, 300, flip);
+                facialWebcam = new tmImage.Webcam(WEBCAM_WIDTH, WEBCAM_HEIGHT, flip);
                 await facialWebcam.setup();
                 await facialWebcam.play();
                 
                 isFacialRecognitionRunning = true;
+                lastPredictionTime = 0;
                 
                 // Append webcam to the DOM
                 const webcamContainer = document.getElementById('webcam-container');
@@ -2613,9 +2628,19 @@
                 // Initialize label container
                 initializePredictionLabels();
                 
-                // Update UI
-                statusEl.textContent = lang['webcam-status-running'];
-                statusEl.className = 'webcam-status success';
+                // Update UI with demo mode indicator if applicable
+                if (isDemoMode) {
+                    const demoMessages = {
+                        en: 'Demo Mode - No model loaded. Add your Teachable Machine model for real detection.',
+                        ms: 'Mod Demo - Tiada model dimuatkan. Tambah model Teachable Machine anda untuk pengesanan sebenar.',
+                        zh: '演示模式 - 未加载模型。添加您的Teachable Machine模型以进行真实检测。'
+                    };
+                    statusEl.textContent = demoMessages[currentLanguage];
+                    statusEl.className = 'webcam-status';
+                } else {
+                    statusEl.textContent = lang['webcam-status-running'];
+                    statusEl.className = 'webcam-status success';
+                }
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'inline-block';
                 
@@ -2658,12 +2683,69 @@
             });
         }
 
-        // Prediction loop
+        // Initialize demo predictions with balanced starting values
+        function initDemoPredictions() {
+            demoPredictions = emotions.map((emotion, i) => ({
+                className: emotion.name,
+                probability: 1 / emotions.length
+            }));
+            demoTransitionTarget = null;
+            demoTransitionProgress = 0;
+        }
+
+        // Generate more realistic demo predictions with smooth transitions
+        function generateDemoPredictions() {
+            // Occasionally change the dominant emotion for demo
+            if (!demoTransitionTarget || demoTransitionProgress >= 1) {
+                // Pick a new random dominant emotion
+                const dominantIndex = Math.floor(Math.random() * emotions.length);
+                demoTransitionTarget = emotions.map((emotion, i) => {
+                    if (i === dominantIndex) {
+                        return 0.5 + Math.random() * 0.3; // 50-80% for dominant
+                    } else {
+                        return 0.05 + Math.random() * 0.1; // 5-15% for others
+                    }
+                });
+                // Normalize target
+                const total = demoTransitionTarget.reduce((sum, p) => sum + p, 0);
+                demoTransitionTarget = demoTransitionTarget.map(p => p / total);
+                demoTransitionProgress = 0;
+            }
+            
+            // Smoothly interpolate towards target
+            demoTransitionProgress += 0.05;
+            demoPredictions = emotions.map((emotion, i) => ({
+                className: emotion.name,
+                probability: demoPredictions[i].probability + 
+                    (demoTransitionTarget[i] - demoPredictions[i].probability) * 0.1
+            }));
+            
+            // Add small noise for realism
+            demoPredictions.forEach(p => {
+                p.probability += (Math.random() - 0.5) * 0.02;
+                p.probability = Math.max(0.01, Math.min(0.95, p.probability));
+            });
+            
+            // Normalize
+            const total = demoPredictions.reduce((sum, p) => sum + p.probability, 0);
+            demoPredictions.forEach(p => p.probability /= total);
+            
+            return demoPredictions;
+        }
+
+        // Prediction loop with frame rate limiting
         async function facialLoop() {
             if (!isFacialRecognitionRunning) return;
             
             facialWebcam.update();
-            await facialPredict();
+            
+            // Throttle predictions to save CPU
+            const now = performance.now();
+            if (now - lastPredictionTime >= PREDICTION_INTERVAL) {
+                lastPredictionTime = now;
+                await facialPredict();
+            }
+            
             facialAnimationId = window.requestAnimationFrame(facialLoop);
         }
 
@@ -2677,14 +2759,8 @@
                 // Use actual model prediction
                 predictions = await facialModel.predict(facialWebcam.canvas);
             } else {
-                // Demo mode - simulate predictions with random values
-                predictions = emotions.map((emotion, i) => ({
-                    className: emotion.name,
-                    probability: Math.random()
-                }));
-                // Normalize to sum to 1
-                const total = predictions.reduce((sum, p) => sum + p.probability, 0);
-                predictions.forEach(p => p.probability /= total);
+                // Demo mode - generate realistic simulated predictions
+                predictions = generateDemoPredictions();
             }
             
             // Find the top prediction
@@ -2697,8 +2773,9 @@
             
             // Update detected emotion display
             const emotion = emotions.find(e => e.name === topPrediction.className) || emotions[0];
+            const demoIndicator = isDemoMode ? ' (Demo)' : '';
             document.getElementById('detected-emotion').textContent = 
-                `${emotion.translatedName} (${(topPrediction.probability * 100).toFixed(1)}%)`;
+                `${emotion.translatedName} (${(topPrediction.probability * 100).toFixed(1)}%)${demoIndicator}`;
             
             // Update all prediction bars
             predictions.forEach((prediction, i) => {
@@ -2728,6 +2805,9 @@
             const lang = translations[currentLanguage];
             
             isFacialRecognitionRunning = false;
+            isDemoMode = false;
+            demoPredictions = null;
+            demoTransitionTarget = null;
             
             if (facialAnimationId) {
                 window.cancelAnimationFrame(facialAnimationId);
