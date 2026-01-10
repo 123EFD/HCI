@@ -1769,76 +1769,53 @@
             // Draw features based on emotion
             switch(emotionName) {
                 case "Happy":
-                    // Eyes
-                    drawEye(svgElement, 70, 80, true);
-                    drawEye(svgElement, 130, 80, true);
-                    // Smile
-                    const smile = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    smile.setAttribute("d", "M 60 120 Q 100 150 140 120");
-                    smile.setAttribute("stroke", "#2d3748");
-                    smile.setAttribute("stroke-width", "4");
-                    smile.setAttribute("fill", "none");
-                    smile.setAttribute("stroke-linecap", "round");
+                    const smile = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    smile.setAttribute("href", "assets/happy.png"); // adjust to your actual path
+                    smile.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/happy.png");
+                    smile.setAttribute("x", "10");
+                    smile.setAttribute("y", "10");
+                    smile.setAttribute("width", "180");
+                    smile.setAttribute("height", "180");
+                    smile.setAttribute("preserveAspectRatio", "xMidYMid meet");
                     svgElement.appendChild(smile);
+
+                    const title_happy = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title_happy.textContent = "Happy";
+                    svgElement.appendChild(title_happy);
                     break;
 
                 case "Sad":
-                    // Eyes
-                    drawEye(svgElement, 70, 85, false);
-                    drawEye(svgElement, 130, 85, false);
                     // Tears
-                    const tear1 = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-                    tear1.setAttribute("cx", "70");
-                    tear1.setAttribute("cy", "105");
-                    tear1.setAttribute("rx", "3");
-                    tear1.setAttribute("ry", "8");
-                    tear1.setAttribute("fill", "#6C9BCF");
+                    const tear1 = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    tear1.setAttribute("href", "assets/sad.png"); // adjust to your actual path
+                    tear1.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/sad.png");
+                    tear1.setAttribute("x", "10");
+                    tear1.setAttribute("y", "10");
+                    tear1.setAttribute("width", "180");
+                    tear1.setAttribute("height", "180");
+                    tear1.setAttribute("preserveAspectRatio", "xMidYMid meet");
                     svgElement.appendChild(tear1);
-                    // Frown
-                    const frown = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    frown.setAttribute("d", "M 60 140 Q 100 120 140 140");
-                    frown.setAttribute("stroke", "#2d3748");
-                    frown.setAttribute("stroke-width", "4");
-                    frown.setAttribute("fill", "none");
-                    frown.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(frown);
+
+                    const title_sad = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title_sad.textContent = "Sad";
+                    svgElement.appendChild(title_sad);
                     break;
 
                 case "Angry":
-                    // Angry eyebrows
-                    const brow1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    brow1.setAttribute("x1", "55");
-                    brow1.setAttribute("y1", "65");
-                    brow1.setAttribute("x2", "85");
-                    brow1.setAttribute("y2", "75");
-                    brow1.setAttribute("stroke", "#2d3748");
-                    brow1.setAttribute("stroke-width", "6");
-                    brow1.setAttribute("stroke-linecap", "round");
+                    // Angry eyebrows 
+                    const brow1 = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    brow1.setAttribute("href", "assets/angry.png"); // adjust to your actual path
+                    brow1.setAttributeNS("http://www.w3.org/1999/xlink", "href", "assets/angry.png");
+                    brow1.setAttribute("x", "10");
+                    brow1.setAttribute("y", "10");
+                    brow1.setAttribute("width", "180");
+                    brow1.setAttribute("height", "180");
+                    brow1.setAttribute("preserveAspectRatio", "xMidYMid meet");
                     svgElement.appendChild(brow1);
-                    
-                    const brow2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                   brow2.setAttribute("x1", "115");
-                    brow2.setAttribute("y1", "75");
-                    brow2.setAttribute("x2", "145");
-                    brow2.setAttribute("y2", "65");
-                    brow2.setAttribute("stroke", "#2d3748");
-                    brow2.setAttribute("stroke-width", "6");
-                    brow2.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(brow2);
-                    
-                    // Eyes
-                    drawEye(svgElement, 70, 85, false);
-                    drawEye(svgElement, 130, 85, false);
-                    // Angry mouth
-                    const angryMouth = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    angryMouth.setAttribute("x1", "70");
-                    angryMouth.setAttribute("y1", "135");
-                    angryMouth.setAttribute("x2", "130");
-                    angryMouth.setAttribute("y2", "135");
-                    angryMouth.setAttribute("stroke", "#2d3748");
-                    angryMouth.setAttribute("stroke-width", "4");
-                    angryMouth.setAttribute("stroke-linecap", "round");
-                    svgElement.appendChild(angryMouth);
+
+                    const title_angry = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                    title_angry.textContent = "Angry";
+                    svgElement.appendChild(title_angry);
                     break;
 
                 case "Surprised":
