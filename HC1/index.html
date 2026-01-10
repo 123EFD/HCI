@@ -1101,7 +1101,8 @@
                 'webcam-status-error': 'Error: Could not access webcam. Please allow camera access.',
                 'detected-emotion-label': 'Detected Emotion:',
                 'prediction-title': 'Emotion Predictions',
-                'model-note': 'Note: This feature uses a Teachable Machine model to detect emotions. For best results, ensure good lighting and face the camera directly.',
+                'note-label': 'Note:',
+                'model-note': 'This feature uses a Teachable Machine model to detect emotions. For best results, ensure good lighting and face the camera directly.',
                 'model-link': 'Create your own emotion model with Teachable Machine →'
             },
             ms: {
@@ -1150,7 +1151,8 @@
                 'webcam-status-error': 'Ralat: Tidak dapat mengakses kamera web. Sila benarkan akses kamera.',
                 'detected-emotion-label': 'Emosi Dikesan:',
                 'prediction-title': 'Ramalan Emosi',
-                'model-note': 'Nota: Ciri ini menggunakan model Teachable Machine untuk mengesan emosi. Untuk hasil terbaik, pastikan pencahayaan yang baik dan hadap kamera secara langsung.',
+                'note-label': 'Nota:',
+                'model-note': 'Ciri ini menggunakan model Teachable Machine untuk mengesan emosi. Untuk hasil terbaik, pastikan pencahayaan yang baik dan hadap kamera secara langsung.',
                 'model-link': 'Cipta model emosi anda sendiri dengan Teachable Machine →'
             },
             zh: {
@@ -1199,7 +1201,8 @@
                 'webcam-status-error': '错误：无法访问摄像头。请允许摄像头访问。',
                 'detected-emotion-label': '检测到的情绪：',
                 'prediction-title': '情绪预测',
-                'model-note': '注意：此功能使用Teachable Machine模型来检测情绪。为获得最佳效果，请确保良好的照明并直接面对摄像头。',
+                'note-label': '注意：',
+                'model-note': '此功能使用Teachable Machine模型来检测情绪。为获得最佳效果，请确保良好的照明并直接面对摄像头。',
                 'model-link': '使用Teachable Machine创建你自己的情绪模型 →'
             }
         };
@@ -1293,6 +1296,9 @@
             
             // Update emotion names and descriptions
             updateEmotionTranslations();
+            
+            // Update facial recognition UI
+            updateFacialRecognitionUI();
         }
 
         // Function to update emotion translations in the data
@@ -1331,7 +1337,24 @@
                 const emotionName = zone.dataset.emotion;
                 const emotion = emotions.find(e => e.name === emotionName);
                 if (emotion) {
-                    zone.textContent = emotion.translatedName;
+                    // Clear and recreate content with voice button
+                    zone.innerHTML = '';
+                    
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = emotion.translatedName;
+                    textSpan.className = 'emotion-text';
+                    
+                    const voiceBtn = document.createElement('button');
+                    voiceBtn.className = 'voice-button';
+                    voiceBtn.title = 'Listen';
+                    voiceBtn.textContent = '🔊';
+                    voiceBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        speakEmotionName(emotionName, voiceBtn);
+                    };
+                    
+                    zone.appendChild(textSpan);
+                    zone.appendChild(voiceBtn);
                 }
             });
             
@@ -1356,7 +1379,12 @@
                 const question = quizQuestions[currentQuestionIndex];
                 const emotion = emotions.find(e => e.name === question.emotion);
                 if (emotion) {
-                    document.querySelector('.quiz-prompt').textContent = emotion.translatedName;
+                    // Update quiz prompt with voice button
+                    const quizPrompt = document.querySelector('.quiz-prompt');
+                    quizPrompt.innerHTML = `
+                        ${emotion.translatedName}
+                        <button class="voice-button" onclick="speakEmotionName('${question.emotion}', this)" title="Listen">🔊</button>
+                    `;
                 }
                 
                 // Update Yes/No options if question hasn't been answered yet
@@ -1452,6 +1480,41 @@
             utterance.lang = getLanguageCode();
             utterance.rate = 0.9;
             utterance.pitch = 1;
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Function to speak an emotion name with TTS
+        function speakEmotionName(emotionName, buttonElement) {
+            const emotion = emotions.find(e => e.name === emotionName);
+            if (!emotion) return;
+            
+            const text = emotion.translatedName;
+            if (!text) return;
+            
+            // Stop any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = getLanguageCode();
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Visual feedback
+            if (buttonElement) {
+                buttonElement.classList.add('playing');
+                
+                const resetButton = () => {
+                    buttonElement.classList.remove('playing');
+                };
+                
+                utterance.onend = resetButton;
+                utterance.onerror = (event) => {
+                    console.warn('Speech synthesis error:', event.error);
+                    resetButton();
+                };
+            }
             
             window.speechSynthesis.speak(utterance);
         }
@@ -1939,7 +2002,13 @@
             const emotion = emotions[currentCardIndex];
             const faceSvg = document.getElementById('card-face');
             drawHumanFace(faceSvg, emotion.name);
-            document.getElementById('card-emotion-name').textContent = emotion.translatedName;
+            
+            // Update emotion name with voice button
+            const emotionNameEl = document.getElementById('card-emotion-name');
+            emotionNameEl.innerHTML = `
+                ${emotion.translatedName}
+                <button class="voice-button" onclick="event.stopPropagation(); speakEmotionName('${emotion.name}', this)" title="Listen">🔊</button>
+            `;
             
             document.getElementById('flashcard').classList.remove('flipped');
             isCardFlipped = false;
@@ -2012,8 +2081,24 @@
             shuffledNames.forEach(emotionData => {
                 const dropZone = document.createElement('div');
                 dropZone.className = 'drop-zone';
-                dropZone.textContent = emotionData.translatedName;
                 dropZone.dataset.emotion = emotionData.name;
+                
+                // Create text span and voice button
+                const textSpan = document.createElement('span');
+                textSpan.textContent = emotionData.translatedName;
+                textSpan.className = 'emotion-text';
+                
+                const voiceBtn = document.createElement('button');
+                voiceBtn.className = 'voice-button';
+                voiceBtn.title = 'Listen';
+                voiceBtn.textContent = '🔊';
+                voiceBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    speakEmotionName(emotionData.name, voiceBtn);
+                };
+                
+                dropZone.appendChild(textSpan);
+                dropZone.appendChild(voiceBtn);
                 
                 dropZone.addEventListener('dragover', handleDragOver);
                 dropZone.addEventListener('drop', handleDrop);
@@ -2241,8 +2326,12 @@
             const emotion = emotions.find(e => e.name === question.emotion);
             const translatedEmotionName = emotion ? emotion.translatedName : question.emotion;
             
-            // Update the quiz prompt to show the translated emotion word
-            document.querySelector('.quiz-prompt').textContent = translatedEmotionName;
+            // Update the quiz prompt to show the translated emotion word with voice button
+            const quizPrompt = document.querySelector('.quiz-prompt');
+            quizPrompt.innerHTML = `
+                ${translatedEmotionName}
+                <button class="voice-button" onclick="speakEmotionName('${question.emotion}', this)" title="Listen">🔊</button>
+            `;
             
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
@@ -2389,7 +2478,10 @@
                 
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'sound-name';
-                nameDiv.textContent = emotion.translatedName;
+                nameDiv.innerHTML = `
+                    ${emotion.translatedName}
+                    <button class="voice-button" onclick="event.stopPropagation(); speakEmotionName('${emotion.name}', this)" title="Listen">🔊</button>
+                `;
                 
                 const descDiv = document.createElement('div');
                 descDiv.className = 'sound-description';
@@ -2558,6 +2650,7 @@
             const status = document.getElementById('webcam-status');
             const detectedLabel = document.getElementById('detected-label');
             const predictionTitle = document.getElementById('prediction-title');
+            const modelNote = document.getElementById('model-note');
             
             if (startBtn && !isFacialRecognitionRunning) {
                 startBtn.textContent = lang['start-camera'];
@@ -2573,6 +2666,13 @@
             }
             if (predictionTitle) {
                 predictionTitle.textContent = lang['prediction-title'];
+            }
+            if (modelNote) {
+                modelNote.innerHTML = `
+                    <strong>${lang['note-label']}</strong> ${lang['model-note']}
+                    <br><br>
+                    <a href="https://teachablemachine.withgoogle.com/train/image" target="_blank">${lang['model-link']}</a>
+                `;
             }
         }
 
